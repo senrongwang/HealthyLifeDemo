@@ -85,6 +85,72 @@ tools: [task]             # 必须开启 task 工具或子代理调用权限
 
 ---
 
+# 截图调试流程（UI 视觉验证）
+
+当需要验证 UI 渲染效果（如背景色、布局、卡片样式等视觉问题）时，按以下流程在模拟器上截图并通过 `@vision-helper` 分析。
+
+## 前置条件
+
+- `devecocli` 可用（PowerShell 需用 `powershell -ExecutionPolicy Bypass -Command "..."` 调用）
+- 模拟器已创建（首次需通过 DevEco Studio Device Manager 创建）
+
+## 步骤
+
+### 1. 启动模拟器
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "devecocli emulator list"
+powershell -ExecutionPolicy Bypass -Command "devecocli emulator start <模拟器名称>"
+```
+
+等待模拟器启动完成（`devecocli device list` 能查到设备）。
+
+### 2. 构建并部署应用
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "devecocli run --device <模拟器名称> --uninstall"
+```
+
+`--uninstall` 确保旧包被清除，避免签名冲突。等待 "start ability successfully" 输出。
+
+### 3. 截图
+
+`hdc` 不在 PATH 中，需用完整路径调用。截图**必须用 `.jpeg` 后缀**（模拟器不支持 `.png`）。
+
+```powershell
+$hdc = "C:\Program Files\Huawei\DevEco Studio\sdk\default\openharmony\toolchains\hdc.exe"
+& $hdc shell snapshot_display -f /data/local/tmp/screenshot.jpeg
+& $hdc file recv /data/local/tmp/screenshot.jpeg "C:\Users\Wsr\AppData\Local\Temp\opencode\screenshot.jpeg"
+```
+
+### 4. 派发 vision-helper 分析
+
+通过 `Task` 工具将截图路径分派给 `@vision-helper`，要求其报告：
+- 背景色（hex 估算）
+- 卡片/容器样式（圆角、阴影、背景色）
+- 与设计预期（`screenshots/` 参考截图）的差异
+
+### 5. 根据分析结果修正代码
+
+拿到 `@vision-helper` 的结构化描述后，对照设计截图定位差异，修改 `.ets` 文件，重新构建→部署→截图，直至视觉符合预期。
+
+### 6. 关闭模拟器（防止内存 OOM）
+
+调试结束后**必须关闭模拟器**：
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "devecocli emulator stop <模拟器名称>"
+```
+
+## 注意事项
+
+- 模拟器名称通过 `devecocli emulator list` 查询（本项目模拟器名为 `Pura`）
+- 截图文件保存在 `C:\Users\Wsr\AppData\Local\Temp\opencode\` 下（预审批目录）
+- `hdc shell snapshot_display` 仅支持 `.jpeg` 后缀，用 `.png` 会报错
+- 若 `devecocli` 命令报 PowerShell 执行策略错误，用 `powershell -ExecutionPolicy Bypass -Command "..."` 包裹
+
+---
+
 # 项目简介
 
 ## 是什么

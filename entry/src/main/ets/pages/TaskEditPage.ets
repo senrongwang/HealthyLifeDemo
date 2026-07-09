@@ -200,7 +200,7 @@ struct TaskEditPage {
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F5F5F5')
+    .backgroundColor('#F2F3F5')
     .bindSheet($$this.showTimePicker, this.timePickerBuilder(), {
       height: 300,
       dragBar: true

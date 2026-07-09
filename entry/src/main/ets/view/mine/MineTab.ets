@@ -76,5 +76,6 @@ export struct MineTab {
     }
     .width('100%')
     .height('100%')
+    .backgroundColor('#F2F3F5')
   }
 }

@@ -187,6 +187,18 @@
     {
       "name": "unit_pre_day",
       "value": "/ day"
+    },
+    {
+      "name": "delete_task",
+      "value": "Delete task"
+    },
+    {
+      "name": "delete_task_confirm",
+      "value": "Remove this task from your list? Past check-in records will be kept."
+    },
+    {
+      "name": "select_action",
+      "value": "Select an action"
     }
   ]
 }

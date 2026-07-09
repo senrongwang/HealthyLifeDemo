@@ -72,6 +72,16 @@ export class TaskRepository {
     await store.executeSql(sql);
   }
 
+  public async deleteTask(taskType: TaskType): Promise<void> {
+    const store: relationalStore.RdbStore | null = this.rdbStore;
+    if (store === null) {
+      return;
+    }
+    const tt: number = taskType;
+    await store.executeSql(`UPDATE task SET isOpen=0 WHERE taskType=${tt}`);
+    Logger.info(`deleteTask(close) taskType=${tt}`);
+  }
+
   public async getTodayRecords(): Promise<TaskRecord[]> {
     const store: relationalStore.RdbStore | null = this.rdbStore;
     if (store === null) {

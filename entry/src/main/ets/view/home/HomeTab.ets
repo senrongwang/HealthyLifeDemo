@@ -22,6 +22,8 @@ export struct HomeTab {
   @State showClockInDialog: boolean = false;
   @State clockInTaskType: TaskType = TaskType.GETUP;
   @State calSelectedDate: string = DateUtils.today();
+  @State showTaskActionSheet: boolean = false;
+  @State actionSheetTaskType: TaskType = TaskType.GETUP;
 
   aboutToAppear(): void {
     AppStorage.setOrCreate('achDialogShow', false);
@@ -123,6 +125,29 @@ export struct HomeTab {
     return openTasks;
   }
 
+  private openTaskActionSheet(task: TaskInfo): void {
+    this.actionSheetTaskType = task.taskType;
+    this.showTaskActionSheet = true;
+  }
+
+  private confirmDeleteTask(taskType: TaskType): void {
+    AlertDialog.show({
+      title: $r('app.string.delete_task'),
+      message: $r('app.string.delete_task_confirm'),
+      autoCancel: true,
+      confirm: {
+        value: $r('app.string.confirm'),
+        action: async () => {
+          try {
+            await this.homeVM.deleteTask(taskType);
+          } catch (e) {
+            Logger.error('HomeTab deleteTask failed');
+          }
+        }
+      }
+    });
+  }
+
   build(): void {
     Stack() {
       Column() {
@@ -154,7 +179,14 @@ export struct HomeTab {
         .width('100%')
         .height($r('app.float.default_220'))
 
-        WeekCalendar({ selectedDate: $calSelectedDate })
+        Column() {
+          WeekCalendar({ selectedDate: $calSelectedDate })
+        }
+        .width('100%')
+        .backgroundColor('#FFFFFF')
+        .borderRadius($r('app.float.default_12'))
+        .margin({ left: $r('app.float.default_12'), right: $r('app.float.default_12'), top: $r('app.float.default_12') })
+        .shadow({ radius: 8, color: '#1A000000', offsetX: 0, offsetY: 2 })
 
         Text($r('app.string.task_list'))
           .fontSize($r('app.float.default_20'))
@@ -191,6 +223,9 @@ export struct HomeTab {
                     onItemClick: (t: TaskInfo) => {
                       this.clockInTaskType = t.taskType;
                       this.showClockInDialog = true;
+                    },
+                    onItemLongPress: (t: TaskInfo) => {
+                      this.openTaskActionSheet(t);
                     }
                   })
                 }
@@ -200,14 +235,17 @@ export struct HomeTab {
             }
             .width('100%')
             .layoutWeight(1)
+            .backgroundColor('#00000000')
             .padding({ top: $r('app.float.default_8'), bottom: $r('app.float.default_60') })
           }
         }
         .layoutWeight(1)
         .width('100%')
+        .backgroundColor('#F2F3F5')
       }
       .width('100%')
       .height('100%')
+      .backgroundColor('#F2F3F5')
 
       Stack() {
         Text('+')
@@ -233,7 +271,9 @@ export struct HomeTab {
     }
     .width('100%')
     .height('100%')
+    .backgroundColor('#F2F3F5')
     .bindContentCover($$this.showClockInDialog, this.clockInDialogBuilder())
+    .bindContentCover($$this.showTaskActionSheet, this.taskActionSheetBuilder())
   }
 
   @Builder
@@ -287,5 +327,88 @@ export struct HomeTab {
     .backgroundColor('#66000000')
     .justifyContent(FlexAlign.Center)
     .alignItems(HorizontalAlign.Center)
+  }
+
+  @Builder
+  taskActionSheetBuilder(): void {
+    Column() {
+      Column() {
+        Image(TaskConstants.getMeta(this.actionSheetTaskType).taskIcon)
+          .width($r('app.float.default_40'))
+          .height($r('app.float.default_40'))
+          .objectFit(ImageFit.Contain)
+          .margin({ top: $r('app.float.default_24') })
+
+        Text(TaskConstants.getMeta(this.actionSheetTaskType).name)
+          .fontSize($r('app.float.default_20'))
+          .fontColor('#333333')
+          .fontWeight(FontWeight.Bold)
+          .margin({ top: $r('app.float.default_12') })
+
+        Row() {
+          Text('删除')
+            .fontSize($r('app.float.default_16'))
+            .fontColor('#333333')
+            .fontWeight(FontWeight.Medium)
+            .textAlign(TextAlign.Center)
+            .height($r('app.float.default_40'))
+            .borderRadius($r('app.float.default_20'))
+            .backgroundColor('#F5F5F5')
+            .layoutWeight(1)
+            .onClick(() => {
+              this.showTaskActionSheet = false;
+              this.confirmDeleteTask(this.actionSheetTaskType);
+            })
+
+          Text('编辑')
+            .fontSize($r('app.float.default_16'))
+            .fontColor('#333333')
+            .fontWeight(FontWeight.Medium)
+            .textAlign(TextAlign.Center)
+            .height($r('app.float.default_40'))
+            .borderRadius($r('app.float.default_20'))
+            .backgroundColor('#F5F5F5')
+            .layoutWeight(1)
+            .margin({ left: $r('app.float.default_12') })
+            .onClick(() => {
+              this.showTaskActionSheet = false;
+              router.pushUrl({
+                url: 'pages/TaskEditPage',
+                params: { taskType: this.actionSheetTaskType, isAdd: false }
+              });
+            })
+
+          Text('取消')
+            .fontSize($r('app.float.default_16'))
+            .fontColor('#333333')
+            .fontWeight(FontWeight.Medium)
+            .textAlign(TextAlign.Center)
+            .height($r('app.float.default_40'))
+            .borderRadius($r('app.float.default_20'))
+            .backgroundColor('#F5F5F5')
+            .layoutWeight(1)
+            .margin({ left: $r('app.float.default_12') })
+            .onClick(() => {
+              this.showTaskActionSheet = false;
+            })
+        }
+        .width('100%')
+        .margin({ top: $r('app.float.default_24') })
+        .padding({ left: $r('app.float.default_16'), right: $r('app.float.default_16'), bottom: $r('app.float.default_24') })
+      }
+      .width('80%')
+      .backgroundColor('#FFFFFF')
+      .borderRadius($r('app.float.default_16'))
+      .alignItems(HorizontalAlign.Center)
+      .hitTestBehavior(HitTestMode.Block)
+    }
+    .width('100%')
+    .height('100%')
+    .backgroundColor('#66000000')
+    .justifyContent(FlexAlign.Center)
+    .alignItems(HorizontalAlign.Center)
+    .onClick(() => {
+      this.showTaskActionSheet = false;
+    })
   }
 }

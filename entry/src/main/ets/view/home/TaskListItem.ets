@@ -5,6 +5,7 @@ export struct TaskListItem {
   @ObjectLink task: TaskInfo;
   record: TaskRecord | null = null;
   onItemClick: (task: TaskInfo) => void = () => {};
+  onItemLongPress: (task: TaskInfo) => void = () => {};
 
   build(): void {
     Row() {
@@ -49,7 +50,14 @@ export struct TaskListItem {
     .alignItems(VerticalAlign.Center)
     .backgroundColor('#FFFFFF')
     .borderRadius($r('app.float.default_8'))
+    .shadow({ radius: 4, color: '#1A000000', offsetX: 0, offsetY: 1 })
     .margin({ left: $r('app.float.default_16'), right: $r('app.float.default_16'), top: $r('app.float.default_4'), bottom: $r('app.float.default_4') })
+    .gesture(
+      LongPressGesture({ repeat: false, duration: 500 })
+        .onAction(() => {
+          this.onItemLongPress(this.task);
+        })
+    )
     .onClick(() => {
       this.onItemClick(this.task);
     })

@@ -34,6 +34,18 @@ export class HomeViewModel {
     }
   }
 
+  public async deleteTask(taskType: TaskType): Promise<void> {
+    const repo: TaskRepository = TaskRepository.getInstance();
+    await repo.deleteTask(taskType);
+    this.taskList = await repo.getTasks();
+    this.todayRecords = await repo.getTodayRecords();
+    this.refreshProgress();
+    await this.refreshAllDone();
+    AppStorage.setOrCreate(Constants.APP_KEY_TASK_LIST, this.taskList);
+    AppStorage.setOrCreate(Constants.APP_KEY_TODAY_RECORDS, this.todayRecords);
+    Logger.info('HomeViewModel deleteTask done');
+  }
+
   public refreshProgress(): void {
     let openCount: number = 0;
     for (const t of this.taskList) {

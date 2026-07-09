@@ -19,6 +19,7 @@ export default class EntryAbility extends UIAbility {
   onWindowStageCreate(windowStage: window.WindowStage): void {
     Logger.info('EntryAbility onWindowStageCreate');
     this.initializeAppStorage();
+    this.setWindowBackground(windowStage);
     this.initAndLoad(windowStage);
   }
 
@@ -39,6 +40,15 @@ export default class EntryAbility extends UIAbility {
     AppStorage.setOrCreate(Constants.APP_KEY_STREAK, 0);
     AppStorage.setOrCreate(Constants.APP_KEY_TODAY_ALL_DONE, false);
     AppStorage.setOrCreate(Constants.APP_KEY_SPLASH_DONE, false);
+  }
+
+  private async setWindowBackground(windowStage: window.WindowStage): Promise<void> {
+    try {
+      const win: window.Window = await windowStage.getMainWindow();
+      win.setWindowBackgroundColor('#F2F3F5');
+    } catch (e) {
+      Logger.error('EntryAbility setWindowBackground failed');
+    }
   }
 
   private async initAndLoad(windowStage: window.WindowStage): Promise<void> {
