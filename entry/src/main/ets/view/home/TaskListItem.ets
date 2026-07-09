@@ -53,13 +53,17 @@ export struct TaskListItem {
     .shadow({ radius: 4, color: '#1A000000', offsetX: 0, offsetY: 1 })
     .margin({ left: $r('app.float.default_16'), right: $r('app.float.default_16'), top: $r('app.float.default_4'), bottom: $r('app.float.default_4') })
     .gesture(
-      LongPressGesture({ repeat: false, duration: 500 })
-        .onAction(() => {
-          this.onItemLongPress(this.task);
-        })
+      GestureGroup(
+        GestureMode.Exclusive,
+        TapGesture()
+          .onAction(() => {
+            this.onItemClick(this.task);
+          }),
+        LongPressGesture({ repeat: false, duration: 500 })
+          .onAction(() => {
+            this.onItemLongPress(this.task);
+          })
+      )
     )
-    .onClick(() => {
-      this.onItemClick(this.task);
-    })
   }
 }
