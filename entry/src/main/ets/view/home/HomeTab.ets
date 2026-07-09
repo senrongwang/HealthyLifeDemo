@@ -1,5 +1,5 @@
 import { HomeViewModel } from '../../viewmodel/HomeViewModel';
-import { TaskInfo, TaskRecord, TaskType, TaskConstants, Logger, DayProgress } from 'common';
+import { TaskInfo, TaskRecord, TaskType, TaskConstants, DateUtils, Logger } from 'common';
 import { TaskListItem } from './TaskListItem';
 import { ProgressRing } from './ProgressRing';
 import { WeekCalendar } from './WeekCalendar';
@@ -14,7 +14,7 @@ export struct HomeTab {
   @StorageLink('todayAllDone') todayAllDone: boolean = false;
   @State showClockInDialog: boolean = false;
   @State clockInTaskType: TaskType = TaskType.GETUP;
-  @State weekProgress: DayProgress[] = [];
+  @State calSelectedDate: string = DateUtils.today();
 
   aboutToAppear(): void {
     this.loadData();
@@ -98,13 +98,11 @@ export struct HomeTab {
           }
           .width('100%')
           .height('100%')
-          .justifyContent(FlexAlign.Center)
-          .alignItems(HorizontalAlign.Center)
         }
         .width('100%')
         .height($r('app.float.default_220'))
 
-        WeekCalendar({ weekProgress: this.weekProgress })
+        WeekCalendar({ selectedDate: $calSelectedDate })
 
         Column() {
           if (this.getOpenTaskCount() === 0) {
@@ -113,7 +111,7 @@ export struct HomeTab {
                 .width($r('app.float.default_88'))
                 .height($r('app.float.default_88'))
               Text($r('app.string.no_task'))
-.fontSize($r('app.float.default_14'))
+                .fontSize($r('app.float.default_14'))
                 .fontColor('#999999')
                 .margin({ top: $r('app.float.default_8') })
             }

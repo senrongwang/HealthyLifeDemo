@@ -45,10 +45,14 @@ export class DateUtils {
   }
 
   public static getWeekDates(): string[] {
+    return DateUtils.getWeekDatesByOffset(0);
+  }
+
+  public static getWeekDatesByOffset(weekOffset: number): string[] {
     const today: Date = new Date();
     const idx: number = DateUtils.getWeekIndex(today);
     const monday: Date = new Date(today.getTime());
-    monday.setDate(today.getDate() - idx);
+    monday.setDate(today.getDate() - idx + weekOffset * 7);
     const dates: string[] = [];
     for (let i = 0; i < 7; i++) {
       const d: Date = new Date(monday.getTime());
@@ -56,5 +60,23 @@ export class DateUtils {
       dates.push(DateUtils.formatDate(d));
     }
     return dates;
+  }
+
+  public static getWeekDayLabel(dateStr: string): string {
+    const d: number = parseInt(dateStr.substring(8, 10), 10);
+    return d.toString();
+  }
+
+  public static getWeekRangeString(dates: string[]): string {
+    if (dates.length < 7) {
+      return '';
+    }
+    const first: string = dates[0];
+    const last: string = dates[6];
+    const fm: string = first.substring(5, 7);
+    const fd: string = first.substring(8, 10);
+    const lm: string = last.substring(5, 7);
+    const ld: string = last.substring(8, 10);
+    return `${fm}/${fd} - ${lm}/${ld}`;
   }
 }

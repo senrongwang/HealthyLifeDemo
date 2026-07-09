@@ -1,128 +1,156 @@
-import { DateUtils, DayProgress } from 'common';
+import { DayProgress, DateUtils, Logger } from 'common';
+import { HistoryViewModel } from '../../viewmodel/HistoryViewModel';
 
 @Component
 export struct WeekCalendar {
-  weekDates: string[] = [];
-  weekProgress: DayProgress[] = [];
-  weekOffset: number = 0;
+  @Link selectedDate: string;
+  @State weekOffset: number = 0;
+  @State weekDates: string[] = [];
+  @State weekProgress: DayProgress[] = [];
+  private historyVM: HistoryViewModel = new HistoryViewModel();
+  private weekLabels: string[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   aboutToAppear(): void {
-    this.loadWeekDates();
-  }
-
-  private loadWeekDates(): void {
-    const today: Date = new Date();
-    const idx: number = DateUtils.getWeekIndex(today);
-    const monday: Date = new Date(today.getTime());
-    monday.setDate(today.getDate() - idx + this.weekOffset * 7);
-    const dates: string[] = [];
-    for (let i = 0; i < 7; i++) {
-      const d: Date = new Date(monday.getTime());
-      d.setDate(monday.getDate() + i);
-      dates.push(DateUtils.formatDate(d));
+    this.weekDates = DateUtils.getWeekDatesByOffset(this.weekOffset);
+    if (this.selectedDate.length === 0) {
+      this.selectedDate = DateUtils.today();
     }
-    this.weekDates = dates;
+    this.loadData();
   }
 
-  private getWeekRangeText(): string {
-    if (this.weekDates.length < 7) {
-      return '';
+  private async loadData(): Promise<void> {
+    try {
+      this.weekProgress = await this.historyVM.loadWeekProgressByOffset(this.weekOffset);
+    } catch (e) {
+      Logger.error('WeekCalendar loadData failed');
     }
-    return `${this.weekDates[0]} ~ ${this.weekDates[6]}`;
   }
 
-  private getWeekDayLabel(index: number): string {
-    const labels: string[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    if (index >= 0 && index < labels.length) {
-      return labels[index];
+  private prevWeek(): void {
+    this.weekOffset = this.weekOffset - 1;
+    this.weekDates = DateUtils.getWeekDatesByOffset(this.weekOffset);
+    this.selectedDate = this.weekDates[0];
+    this.loadData();
+  }
+
+  private nextWeek(): void {
+    if (this.weekOffset >= 0) {
+      return;
     }
-    return '';
+    this.weekOffset = this.weekOffset + 1;
+    this.weekDates = DateUtils.getWeekDatesByOffset(this.weekOffset);
+    this.selectedDate = this.weekDates[0];
+    this.loadData();
   }
 
-  private getDayNumber(dateStr: string): string {
-    const parts: string[] = dateStr.split('-');
-    if (parts.length >= 3) {
-      return parts[2];
-    }
-    return '';
-  }
-
-  private isToday(dateStr: string): boolean {
-    return dateStr === DateUtils.today();
-  }
-
-  private isDayAllDone(dateStr: string): boolean {
+  private findProgress(date: string): DayProgress | null {
     for (const dp of this.weekProgress) {
-      if (dp.date === dateStr) {
-        return dp.isAllDone;
+      if (dp.date === date) {
+        return dp;
       }
     }
-    return false;
+    return null;
+  }
+
+  private isAllDone(date: string): boolean {
+    const dp: DayProgress | null = this.findProgress(date);
+    if (dp === null) {
+      return false;
+    }
+    return dp.isAllDone;
   }
 
   build(): void {
     Column() {
       Row() {
-        Text('<')
-          .fontSize($r('app.float.default_18'))
-          .fontColor('#666666')
+        Image($r('app.media.ic_right_grey'))
+          .width($r('app.float.default_20'))
+          .height($r('app.float.default_20'))
+          .rotate({ angle: 180 })
           .onClick(() => {
-            this.weekOffset = this.weekOffset - 1;
-            this.loadWeekDates();
+            this.prevWeek();
           })
 
-        Text(this.getWeekRangeText())
+        Text(DateUtils.getWeekRangeString(this.weekDates))
           .fontSize($r('app.float.default_14'))
           .fontColor('#333333')
-          .margin({ left: $r('app.float.default_12'), right: $r('app.float.default_12') })
+          .margin({ left: $r('app.float.default_8'), right: $r('app.float.default_8') })
 
-        Text('>')
-          .fontSize($r('app.float.default_18'))
-          .fontColor('#666666')
+        Image($r('app.media.ic_right_grey'))
+          .width($r('app.float.default_20'))
+          .height($r('app.float.default_20'))
+          .opacity(this.weekOffset >= 0 ? 0.3 : 1.0)
           .onClick(() => {
-            if (this.weekOffset < 0) {
-              this.weekOffset = this.weekOffset + 1;
-              this.loadWeekDates();
-            }
+            this.nextWeek();
           })
       }
       .width('100%')
       .justifyContent(FlexAlign.Center)
       .alignItems(VerticalAlign.Center)
-      .height($r('app.float.default_36'))
 
       Row() {
-        ForEach(this.weekDates, (dateStr: string, index: number) => {
-          Column() {
-            Text(this.getWeekDayLabel(index))
-              .fontSize($r('app.float.default_10'))
-              .fontColor('#999999')
-
-            Stack() {
-              Circle()
-                .width($r('app.float.default_32'))
-                .height($r('app.float.default_32'))
-                .fill(this.isDayAllDone(dateStr) ? '#FFD700' : '#E0E0E0')
-
-              Text(this.getDayNumber(dateStr))
-                .fontSize($r('app.float.default_12'))
-                .fontColor(this.isToday(dateStr) ? '#FF6B00' : '#333333')
-                .fontWeight(this.isToday(dateStr) ? FontWeight.Bold : FontWeight.Normal)
-            }
-            .width($r('app.float.default_32'))
-            .height($r('app.float.default_32'))
-            .margin({ top: $r('app.float.default_4') })
-          }
-          .layoutWeight(1)
-          .alignItems(HorizontalAlign.Center)
-        }, (dateStr: string) => dateStr)
+        ForEach(this.weekLabels, (label: string, idx: number): void => {
+          Text(label)
+            .fontSize($r('app.float.default_10'))
+            .fontColor('#999999')
+            .width(0)
+            .layoutWeight(1)
+            .textAlign(TextAlign.Center)
+        }, (_label: string, idx: number): string => idx.toString())
       }
       .width('100%')
-      .padding({ top: $r('app.float.default_4'), bottom: $r('app.float.default_8') })
+      .margin({ top: $r('app.float.default_4') })
+
+      Row() {
+        ForEach(this.weekDates, (date: string, idx: number): void => {
+          this.dayBadge(date, idx)
+        }, (date: string, _idx: number): string => date)
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.SpaceEvenly)
+      .margin({ top: $r('app.float.default_4') })
     }
     .width('100%')
-    .backgroundColor('#FFFFFF')
-    .borderRadius($r('app.float.default_12'))
-    .margin({ left: $r('app.float.default_16'), right: $r('app.float.default_16'), top: $r('app.float.default_8') })
+    .padding({
+      left: $r('app.float.default_16'),
+      right: $r('app.float.default_16'),
+      top: $r('app.float.default_8'),
+      bottom: $r('app.float.default_4')
+    })
+  }
+
+  @Builder
+  dayBadge(date: string, _idx: number): void {
+    Stack() {
+      if (this.findProgress(date) !== null) {
+        Image(this.isAllDone(date)
+          ? $r('app.media.ic_home_all_done')
+          : $r('app.media.ic_home_undone'))
+          .width($r('app.float.default_36'))
+          .height($r('app.float.default_36'))
+          .objectFit(ImageFit.Contain)
+      } else {
+        Column()
+          .width($r('app.float.default_36'))
+          .height($r('app.float.default_36'))
+          .borderRadius($r('app.float.default_18'))
+          .backgroundColor('#F0F0F0')
+      }
+
+      Text(DateUtils.getWeekDayLabel(date))
+        .fontSize(this.selectedDate === date ? $r('app.float.default_14') : $r('app.float.default_12'))
+        .fontWeight(this.selectedDate === date ? FontWeight.Bold : FontWeight.Normal)
+        .fontColor(this.selectedDate === date ? '#FF6B00' : '#666666')
+    }
+    .width($r('app.float.default_40'))
+    .height($r('app.float.default_40'))
+    .borderRadius($r('app.float.default_20'))
+    .border(this.selectedDate === date
+      ? { width: 2, color: '#FF6B00' }
+      : { width: 0, color: '#00000000' })
+    .opacity(DateUtils.compareDate(date, DateUtils.today()) > 0 ? 0.4 : 1.0)
+    .onClick(() => {
+      this.selectedDate = date;
+    })
   }
 }
