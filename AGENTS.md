@@ -82,3 +82,63 @@ tools: [task]             # 必须开启 task 工具或子代理调用权限
 - **记录可追溯**：`docs/实施记录/` 下每个 Phase 一份文档，记录决策与报错原文，便于复盘。
 - **资源去重**：新增模块资源时避免与已有模块同名冲突（module-vs-module 同名会警告；AppScope-vs-module 不警告）。
 - **遵循设计优先级**：编码细节以 `docs/设计文档.md` 为准；若与截图冲突，以 `screenshots/` 实际为准（见 00-主干实施方案.md 修订说明）。
+
+---
+
+# 项目简介
+
+## 是什么
+
+**健康生活（HealthyLife）** 是一款 HarmonyOS 原生应用，帮助用户养成每日健康习惯。用户创建健康任务（早起、喝水、吃苹果、每日微笑、刷牙、早睡），每日打卡，追踪连续天数并解锁成就。
+
+## 技术栈
+
+- **平台**：HarmonyOS 6.1.1（API 24），ArkTS + ArkUI 声明式 UI
+- **架构**：MVVM（Model–View–ViewModel）
+- **存储**：关系型数据库 RDB（任务与打卡记录） + 首选项 Preferences（连续天数/成就/首启标记）
+- **状态管理**：AppStorage 全局状态 + @Observed/@ObjectLink 响应式 + @Provide/@Consume 跨层级传递
+- **构建**：DevEco Studio + hvigor
+
+## 模块结构
+
+```
+entry/                          # 主入口模块（应用 UI + 业务逻辑）
+├── pages/                      # 页面：Index(启动页) / MainTab(Tab壳) / TaskAddPage / TaskEditPage / AchievementPage
+├── view/                       # 视图组件
+│   ├── home/                   #   HomeTab(首页) / WeekCalendar(周历) / TaskListItem(任务项) / ProgressRing(进度环) / ClockInDialog(打卡弹窗)
+│   ├── mine/MineTab.ets        #   我的页
+│   └── dialog/AchievementDialog.ets  # 成就解锁弹窗
+└── viewmodel/                  # ViewModel：HomeVM / TaskVM / AchievementVM / HistoryVM / MineVM
+
+common/                         # 共享 HAR 库（数据层 + 模型 + 工具）
+└── src/main/ets/
+    ├── model/                  # TaskInfo / TaskRecord / TaskType / TaskConstants / AchievementInfo / DayProgress
+    ├── data/                   # RdbHelper(DB) / RdbTables(建表) / TaskRepository(CRUD) / PrefsHelper(首选项)
+    └── common/                 # Constants / DateUtils / Logger
+```
+
+## 核心业务流程
+
+1. **启动** → `Index.ets` 倒计时 → 首启隐私弹窗 → `router.replaceUrl` → `MainTab`
+2. **MainTab** 双 Tab：首页（HomeTab） / 我的（MineTab）
+3. **首页** → 顶部进度环显示当日完成率 → 周历切换日期 → 任务列表打卡 → 全部完成则连续天数 +1 → 触发成就解锁弹窗
+4. **添加任务** → 点 + → `TaskAddPage` → 选择任务类型/设置目标 → 写入 RDB → AppStorage 刷新
+5. **打卡** → 点击任务项 → `ClockInDialog` 弹窗 → 确认 → `HomeViewModel.clockIn()` → 更新 RDB 记录
+
+## 关键文档
+
+| 文档 | 用途 |
+|------|------|
+| `docs/设计文档.md` | 完整设计（数据模型/页面/卡片/提醒），编码细节的权威参照 |
+| `docs/实施计划/00-主干实施方案.md` | 各 Phase 任务详解与验证标准 |
+| `docs/实施计划/待完成功能列表.md` | 总体进度跟踪（唯一真相源） |
+| `docs/实施记录/Phase{0-7}-*.md` | 已完成阶段的实施记录 |
+| `screenshots/` | 参考截图（与设计冲突时以此为准） |
+
+## 编码约定速查
+
+- **禁**：`any` / `as` / 对象字面量类型 / 动态属性访问
+- **必**：全字段显式类型，ArkTS strict 模式
+- **资源引用**：`$r('app.media.*')` / `$r('app.string.*')` / `$r('app.color.*')` / `$r('app.float.*')`，复用 common HAR 已有资源
+- **颜色**：项目中大量使用硬编码 hex（如 `#333333`、`#999999`、`#2563EB`），少量用 `$r('app.color.*')`
+- **尺寸**：统一用 `$r('app.float.default_{N}')` 资源（定义在 `common/src/main/resources/base/element/float.json`）
