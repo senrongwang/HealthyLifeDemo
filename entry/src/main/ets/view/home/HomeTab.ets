@@ -132,11 +132,11 @@ export struct HomeTab {
 
   private confirmDeleteTask(taskType: TaskType): void {
     AlertDialog.show({
-      title: $r('app.string.delete_task'),
-      message: $r('app.string.delete_task_confirm'),
+      title: '删除任务',
+      message: '确定要删除该任务吗？历史打卡记录将保留。',
       autoCancel: true,
       confirm: {
-        value: $r('app.string.confirm'),
+        value: '确认',
         action: async () => {
           try {
             await this.homeVM.deleteTask(taskType);
@@ -346,11 +346,10 @@ export struct HomeTab {
           .margin({ top: $r('app.float.default_12') })
 
         Row() {
-          Text('删除')
+          Button('删除')
             .fontSize($r('app.float.default_16'))
             .fontColor('#333333')
             .fontWeight(FontWeight.Medium)
-            .textAlign(TextAlign.Center)
             .height($r('app.float.default_40'))
             .borderRadius($r('app.float.default_20'))
             .backgroundColor('#F5F5F5')
@@ -360,11 +359,10 @@ export struct HomeTab {
               this.confirmDeleteTask(this.actionSheetTaskType);
             })
 
-          Text('编辑')
+          Button('编辑')
             .fontSize($r('app.float.default_16'))
             .fontColor('#333333')
             .fontWeight(FontWeight.Medium)
-            .textAlign(TextAlign.Center)
             .height($r('app.float.default_40'))
             .borderRadius($r('app.float.default_20'))
             .backgroundColor('#F5F5F5')
@@ -378,11 +376,10 @@ export struct HomeTab {
               });
             })
 
-          Text('取消')
+          Button('取消')
             .fontSize($r('app.float.default_16'))
             .fontColor('#333333')
             .fontWeight(FontWeight.Medium)
-            .textAlign(TextAlign.Center)
             .height($r('app.float.default_40'))
             .borderRadius($r('app.float.default_20'))
             .backgroundColor('#F5F5F5')
@@ -400,7 +397,7 @@ export struct HomeTab {
       .backgroundColor('#FFFFFF')
       .borderRadius($r('app.float.default_16'))
       .alignItems(HorizontalAlign.Center)
-      .hitTestBehavior(HitTestMode.Block)
+      .hitTestBehavior(HitTestMode.Default)
     }
     .width('100%')
     .height('100%')
