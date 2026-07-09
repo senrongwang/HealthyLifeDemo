@@ -33,6 +33,8 @@ agent:
 codex:
   backend: opencode
   command: opencode
+  turn_timeout_ms: 1800000      # 30min (HarmonyOS builds slower; was 1h default)
+  stall_timeout_ms: 300000      # 5min no-event -> kill tree + retry (devecocli LSP/hvigor hangs)
 ---
 
 You are working on a Linear ticket `{{ issue.identifier }}`
@@ -72,7 +74,7 @@ No description provided.
   - `docs/实施记录/Phase{n}-*.md` — per-phase records; add one when you finish a Phase.
 - **Build / verify commands (HarmonyOS):**
   - Full build (the mandatory validation gate): `devecocli build` (default `--product default --build-mode debug`). Use `devecocli build clean` only for clean rebuilds (slow; use when module structure changed or cache suspect).
-  - Per-file ArkTS static check (if the `deveco-mcp` `check` tool is available): run `arkts_check` after editing each `.ets`; fall back to `devecocli build` if the MCP check tool is unavailable.
+  - Per-file ArkTS lint is OPTIONAL: the `deveco-mcp` `check` tool (`arkts_check`) spawns a heavy ArkTS LSP (1000+ files, ~0.7GB) that can stall for minutes — do NOT run it after every edit. Prefer `devecocli build` as the single validation gate (it catches ArkTS errors too). Use `arkts_check` only for a fast targeted lint on one file when the build is otherwise green.
   - Run on emulator: an emulator is available — start it with `devecocli emulator start Pura` (phone, HarmonyOS 6.1.1(24), matches compatibleSdkVersion), then `devecocli run --device Pura`. Emulator debug builds do NOT need an explicit signingConfig. If `emulator start` is blocked on a license agreement, run `devecocli emulator license accept` in an interactive terminal first (agents cannot accept it). Runtime verification on the emulator is expected for app-touching changes.
   - Logs/crash: `devecocli log --crash --bundle-name <bundle>` / `devecocli log --level E --from 5m`.
 - **ArkTS strict rules (must obey):** no `any`, no `as` (type assertions), no object-literal types, no dynamic property access; all fields explicitly typed. Load skill `arkts-error-fixes` if a build ERROR occurs; load `arkts-grammar-standards` when writing `.ets`; load `arkui-knowledge` for ArkUI component/API questions; load `arkts-runtime-fix` for runtime crashes.
