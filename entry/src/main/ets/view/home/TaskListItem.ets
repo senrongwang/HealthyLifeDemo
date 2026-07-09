@@ -23,6 +23,7 @@ export struct TaskListItem {
         Text($r('app.string.was_done'))
           .fontSize($r('app.float.default_14'))
           .fontColor('#999999')
+          .margin({ right: '5%' })
       } else if (this.task.flag === TaskFlag.MULTI && this.record !== null) {
         Row() {
           Text(`${this.record.finNum} / ${this.record.targetValue} `)
@@ -34,10 +35,12 @@ export struct TaskListItem {
               .fontColor('#999999')
           }
         }
+        .margin({ right: '5%' })
       } else {
         Text($r('app.string.task_opened'))
           .fontSize($r('app.float.default_14'))
           .fontColor('#999999')
+          .margin({ right: '5%' })
       }
     }
     .width('100%')

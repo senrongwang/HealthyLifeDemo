@@ -127,7 +127,7 @@ export struct HomeTab {
     Stack() {
       Column() {
         Stack() {
-          Image(this.todayAllDone ? $r('app.media.ic_home_all_done') : $r('app.media.ic_home_bg'))
+          Image($r('app.media.ic_home_bg'))
             .width('100%')
             .height('100%')
             .objectFit(ImageFit.Cover)
@@ -155,6 +155,17 @@ export struct HomeTab {
         .height($r('app.float.default_220'))
 
         WeekCalendar({ selectedDate: $calSelectedDate })
+
+        Text($r('app.string.task_list'))
+          .fontSize($r('app.float.default_20'))
+          .fontWeight(FontWeight.Bold)
+          .fontColor('#1A1A1A')
+          .margin({
+            left: $r('app.float.default_16'),
+            right: $r('app.float.default_16'),
+            top: $r('app.float.default_8'),
+            bottom: $r('app.float.default_4')
+          })
 
         Column() {
           if (this.getOpenTaskCount() === 0) {
@@ -198,19 +209,21 @@ export struct HomeTab {
       .width('100%')
       .height('100%')
 
-      Button() {
-        Image($r('app.media.ic_home_add'))
-          .width($r('app.float.default_24'))
-          .height($r('app.float.default_24'))
+      Stack() {
+        Text('+')
+          .fontSize($r('app.float.default_28'))
+          .fontColor('#FFFFFF')
+          .fontWeight(FontWeight.Medium)
       }
       .width($r('app.float.default_56'))
       .height($r('app.float.default_56'))
       .borderRadius($r('app.float.default_28'))
-      .backgroundColor('#FF6B00')
-      .position({ x: '80%', y: '85%' })
+      .backgroundColor('#2563EB')
+      .markAnchor({ x: '50%', y: '0%' })
+      .position({ x: '50%', y: '90%' })
       .shadow({
         radius: 8,
-        color: '#33000000',
+        color: '#332563EB',
         offsetX: 0,
         offsetY: 2
       })
