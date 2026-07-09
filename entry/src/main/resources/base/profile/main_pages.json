@@ -2,6 +2,8 @@
   "src": [
     "pages/Index",
     "pages/MainTab",
-    "pages/AchievementPage"
+    "pages/AchievementPage",
+    "pages/TaskAddPage",
+    "pages/TaskEditPage"
   ]
 }
