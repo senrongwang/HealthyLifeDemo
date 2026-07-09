@@ -69,7 +69,9 @@ export class HomeViewModel {
   }
 
   private showAchievementDialog(days: number): void {
-    Logger.info(`achievement unlocked, show dialog: ${days} days`);
+    AppStorage.setOrCreate('achDialogDays', days);
+    AppStorage.setOrCreate('achDialogShow', true);
+    Logger.info('achievement unlocked: ' + days.toString() + ' days');
   }
 
   private replaceRecord(rec: TaskRecord): TaskRecord[] {
