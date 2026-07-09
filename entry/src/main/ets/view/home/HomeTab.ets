@@ -1,5 +1,6 @@
 import { HomeViewModel } from '../../viewmodel/HomeViewModel';
-import { TaskInfo, TaskRecord, Logger } from 'common';
+import { TaskInfo, TaskRecord, DateUtils, Logger } from 'common';
+import { WeekCalendar } from './WeekCalendar';
 
 @Component
 export struct HomeTab {
@@ -8,6 +9,7 @@ export struct HomeTab {
   @StorageLink('todayRecords') todayRecords: TaskRecord[] = [];
   @StorageLink('streakDays') streakDays: number = 0;
   @StorageLink('todayAllDone') todayAllDone: boolean = false;
+  @State calSelectedDate: string = DateUtils.today();
 
   aboutToAppear(): void {
     this.loadData();
@@ -79,6 +81,8 @@ export struct HomeTab {
       }
       .width('100%')
       .height($r('app.float.default_220'))
+
+      WeekCalendar({ selectedDate: $calSelectedDate })
 
       Column() {
         if (this.getOpenTaskCount() === 0) {
