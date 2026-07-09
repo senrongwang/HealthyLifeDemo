@@ -268,12 +268,12 @@ export struct HomeTab {
       .onClick(() => {
         router.pushUrl({ url: 'pages/TaskAddPage' });
       })
+      .bindContentCover($$this.showTaskActionSheet, this.taskActionSheetBuilder())
     }
     .width('100%')
     .height('100%')
     .backgroundColor('#F2F3F5')
     .bindContentCover($$this.showClockInDialog, this.clockInDialogBuilder())
-    .bindContentCover($$this.showTaskActionSheet, this.taskActionSheetBuilder())
   }
 
   @Builder
