@@ -62,6 +62,8 @@ export class DateUtils {
     return dates;
   }
 
+  private static WEEKDAY_NAMES: string[] = ['一', '二', '三', '四', '五', '六', '日'];
+
   public static getWeekDayLabel(dateStr: string): string {
     const d: number = parseInt(dateStr.substring(8, 10), 10);
     return d.toString();
@@ -71,12 +73,12 @@ export class DateUtils {
     if (dates.length < 7) {
       return '';
     }
-    const first: string = dates[0];
-    const last: string = dates[6];
-    const fm: string = first.substring(5, 7);
-    const fd: string = first.substring(8, 10);
-    const lm: string = last.substring(5, 7);
-    const ld: string = last.substring(8, 10);
-    return `${fm}/${fd} - ${lm}/${ld}`;
+    const mid: string = dates[3];
+    const date: Date = DateUtils.parseDate(mid);
+    const y: number = date.getFullYear();
+    const m: number = date.getMonth() + 1;
+    const d: number = date.getDate();
+    const weekday: string = DateUtils.WEEKDAY_NAMES[DateUtils.getWeekIndex(date)];
+    return `${y}年${m}月${d}日星期${weekday}`;
   }
 }

@@ -8,7 +8,7 @@ export struct WeekCalendar {
   @State weekDates: string[] = [];
   @State weekProgress: DayProgress[] = [];
   private historyVM: HistoryViewModel = new HistoryViewModel();
-  private weekLabels: string[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  private weekLabels: string[] = ['一', '二', '三', '四', '五', '六', '日'];
 
   aboutToAppear(): void {
     this.weekDates = DateUtils.getWeekDatesByOffset(this.weekOffset);
