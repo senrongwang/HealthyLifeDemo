@@ -64,22 +64,26 @@ struct AchievementPage {
                   Image(info.unlocked ? info.iconOn : info.iconOff)
                     .width($r('app.float.default_72'))
                     .height($r('app.float.default_72'))
-                  Text(info.days.toString() + ' days')
+                  Text(info.unlocked ? $r('app.string.achievement_level', info.days.toString()) : '???')
                     .fontSize($r('app.float.default_12'))
-                    .fontColor('#FFFFFF')
+                    .fontColor(info.unlocked ? '#FFFFFF' : '#666666')
                     .margin({ top: $r('app.float.default_4') })
                 }
                 .justifyContent(FlexAlign.Center)
                 .alignItems(HorizontalAlign.Center)
+                .width('100%')
+                .height('100%')
               }
             }, (info: AchievementInfo, idx: number) => idx.toString())
           }
           .columnsTemplate('1fr 1fr')
-          .columnsGap($r('app.float.default_12'))
-          .rowsGap($r('app.float.default_12'))
+          .rowsTemplate('1fr 1fr 1fr')
+          .columnsGap($r('app.float.default_16'))
+          .rowsGap($r('app.float.default_16'))
           .padding({
-            left: $r('app.float.default_20'),
-            right: $r('app.float.default_20'),
+            left: $r('app.float.default_24'),
+            right: $r('app.float.default_24'),
+            top: $r('app.float.default_16'),
             bottom: $r('app.float.default_20')
           })
           .layoutWeight(1)
