@@ -37,5 +37,5 @@ export class RdbTables {
 
   public static readonly SEED_TASKS_SQL: string =
     'INSERT OR IGNORE INTO task(taskType, flag) VALUES ' +
-    '(0, 0), (1, 1), (2, 1), (3, 0), (4, 0), (5, 0)';
+    '(0, 0), (1, 1), (2, 1), (3, 1), (4, 1), (5, 0)';
 }

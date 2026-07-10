@@ -3,6 +3,7 @@ export struct TargetPickerDialog {
   isTimeMode: boolean = false;
   initialValue1: number = 0;
   initialValue2: number = 0;
+  maxRange: number = 99;
   onConfirm: (value1: number, value2: number) => void = (_v1: number, _v2: number) => {};
   onCancel: () => void = () => {};
 
@@ -30,7 +31,7 @@ export struct TargetPickerDialog {
       }
     } else {
       this.range1 = [];
-      for (let i = 1; i <= 99; i++) {
+      for (let i = 1; i <= this.maxRange; i++) {
         this.range1.push('' + i);
       }
     }

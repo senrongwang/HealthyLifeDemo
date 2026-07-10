@@ -27,8 +27,18 @@ export class RdbHelper {
     await this.store.executeSql(RdbTables.CREATE_TASK_RECORD_SQL);
     await this.store.executeSql(RdbTables.CREATE_INDEX_SQL);
     await this.store.executeSql(RdbTables.SEED_TASKS_SQL);
+    await this.migrateSmileBrushToMulti();
     Logger.info('RdbHelper initialized');
     return this.store;
+  }
+
+  private async migrateSmileBrushToMulti(): Promise<void> {
+    if (this.store === null) {
+      return;
+    }
+    await this.store.executeSql(
+      'UPDATE task SET flag = 1 WHERE taskType IN (3, 4) AND flag = 0'
+    );
   }
 
   public getRdbStore(): relationalStore.RdbStore | null {

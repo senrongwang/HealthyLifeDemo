@@ -18,18 +18,19 @@ interface ReminderText {
   content: string;
 }
 
-@Preview
-@Entry
-@Component
-struct TaskEditPage {
-  @StorageLink('taskList') taskList: TaskInfo[] = [];
-  @State task: TaskInfo = new TaskInfo(TaskType.GETUP, TaskFlag.SINGLE);
-  @State isAddMode: boolean = true;
-  @State showPicker: boolean = false;
-  @State pickerIsTimeMode: boolean = false;
-  @State pickerInitVal1: number = 0;
-  @State pickerInitVal2: number = 0;
-  @State topSafeHeight: number = 0;
+  @Preview
+  @Entry
+  @Component
+  struct TaskEditPage {
+    @StorageLink('taskList') taskList: TaskInfo[] = [];
+    @State task: TaskInfo = new TaskInfo(TaskType.GETUP, TaskFlag.SINGLE);
+    @State isAddMode: boolean = true;
+    @State showPicker: boolean = false;
+    @State pickerIsTimeMode: boolean = false;
+    @State pickerInitVal1: number = 0;
+    @State pickerInitVal2: number = 0;
+    @State pickerMaxRange: number = 99;
+    @State topSafeHeight: number = 0;
 
   aboutToAppear(): void {
     this.calcTopSafeHeight();
@@ -55,6 +56,12 @@ struct TaskEditPage {
           break;
         }
       }
+    }
+
+    if (taskType === TaskType.SMILE || taskType === TaskType.BRUSH) {
+      this.pickerMaxRange = 3;
+    } else {
+      this.pickerMaxRange = 99;
     }
 
     const timeParts: string[] = this.task.reminderTime.split(':');
@@ -427,6 +434,7 @@ struct TaskEditPage {
       isTimeMode: this.pickerIsTimeMode,
       initialValue1: this.pickerInitVal1,
       initialValue2: this.pickerInitVal2,
+      maxRange: this.pickerMaxRange,
       onConfirm: (value1: number, value2: number) => {
         if (this.pickerIsTimeMode) {
           const hh: string = value1 < 10 ? '0' + value1 : '' + value1;

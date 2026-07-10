@@ -44,7 +44,8 @@ export class TaskConstants {
           taskIcon: $r('app.media.ic_task_smile'),
           dialogIcon: $r('app.media.ic_dialog_smile'),
           cardIcon: $r('app.media.ic_card_smile'),
-          flag: TaskFlag.SINGLE
+          unit: $r('app.string.unit_times'),
+          flag: TaskFlag.MULTI
         };
       case TaskType.BRUSH:
         return {
@@ -52,7 +53,8 @@ export class TaskConstants {
           taskIcon: $r('app.media.ic_task_brush'),
           dialogIcon: $r('app.media.ic_dialog_brush'),
           cardIcon: $r('app.media.ic_card_clean'),
-          flag: TaskFlag.SINGLE
+          unit: $r('app.string.unit_times'),
+          flag: TaskFlag.MULTI
         };
       case TaskType.SLEEP:
         return {
