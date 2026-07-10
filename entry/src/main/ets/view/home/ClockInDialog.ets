@@ -8,45 +8,46 @@ export struct ClockInDialog {
 
   build(): void {
     Column() {
-      Column() {
+      Stack() {
         Image(TaskConstants.getMeta(this.taskType).dialogIcon)
-          .width($r('app.float.default_120'))
-          .height($r('app.float.default_120'))
-          .objectFit(ImageFit.Contain)
-          .margin({ top: $r('app.float.default_24') })
+          .width('100%')
+          .height('100%')
+          .objectFit(ImageFit.Cover)
+          .borderRadius($r('app.float.default_16'))
 
-        Text(TaskConstants.getMeta(this.taskType).name)
-          .fontSize($r('app.float.default_20'))
-          .fontColor('#333333')
-          .fontWeight(FontWeight.Bold)
-          .margin({ top: $r('app.float.default_16') })
+        Column() {
+          Blank()
+            .layoutWeight(1)
 
-        Button($r('app.string.clock_in'))
-          .fontSize($r('app.float.default_16'))
-          .fontColor('#FFFFFF')
-          .backgroundColor('#FF6B00')
-          .borderRadius($r('app.float.default_24'))
-          .width($r('app.float.default_132'))
-          .height($r('app.float.default_40'))
-          .margin({ top: $r('app.float.default_24') })
-          .onClick(() => {
-            this.onClockIn(this.taskType);
-            this.controller.close();
-          })
+          Text(TaskConstants.getMeta(this.taskType).name)
+            .fontSize($r('app.float.default_20'))
+            .fontColor('#FFFFFF')
+            .fontWeight(FontWeight.Bold)
+            .alignSelf(ItemAlign.Start)
+            .margin({ left: $r('app.float.default_24') })
+            .margin({ bottom: $r('app.float.default_24') })
 
-        Text($r('app.string.cancel'))
-          .fontSize($r('app.float.default_14'))
-          .fontColor('#999999')
-          .margin({ top: $r('app.float.default_16') })
-          .margin({ bottom: $r('app.float.default_24') })
-          .onClick(() => {
-            this.controller.close();
-          })
+          Button($r('app.string.clock_in'))
+            .fontSize($r('app.float.default_16'))
+            .fontColor('#FFFFFF')
+            .backgroundColor('#4DFFFFFF')
+            .borderRadius($r('app.float.default_20'))
+            .width('70%')
+            .height($r('app.float.default_44'))
+            .margin({ bottom: $r('app.float.default_24') })
+            .onClick(() => {
+              this.onClockIn(this.taskType);
+              this.controller.close();
+            })
+        }
+        .width('100%')
+        .height('100%')
+        .alignItems(HorizontalAlign.Center)
       }
       .width('80%')
-      .backgroundColor('#FFFFFF')
+      .height($r('app.float.default_360'))
       .borderRadius($r('app.float.default_16'))
-      .alignItems(HorizontalAlign.Center)
+      .clip(true)
     }
     .width('100%')
     .height('100%')
