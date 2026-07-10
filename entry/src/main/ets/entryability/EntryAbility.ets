@@ -18,6 +18,10 @@ export default class EntryAbility extends UIAbility {
     Logger.info('EntryAbility onCreate');
   }
 
+  onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    Logger.info('EntryAbility onNewWant from card router event');
+  }
+
   onDestroy(): void {
     Logger.info('EntryAbility onDestroy');
   }

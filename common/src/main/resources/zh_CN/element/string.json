@@ -13,6 +13,34 @@
       "value": "当日暂无打卡记录"
     },
     {
+      "name": "card_1x2_display_name",
+      "value": "任务列表"
+    },
+    {
+      "name": "card_1x2_desc",
+      "value": "显示已添加任务"
+    },
+    {
+      "name": "card_2x2_display_name",
+      "value": "任务进度"
+    },
+    {
+      "name": "card_2x2_desc",
+      "value": "显示任务完成进度"
+    },
+    {
+      "name": "card_no_task",
+      "value": "暂无任务"
+    },
+    {
+      "name": "card_done",
+      "value": "已完成"
+    },
+    {
+      "name": "card_undone",
+      "value": "未完成"
+    },
+    {
       "name": "target_progress",
       "value": "目标进度"
     },

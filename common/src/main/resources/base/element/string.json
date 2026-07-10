@@ -203,6 +203,34 @@
     {
       "name": "no_records",
       "value": "No check-in records for this day"
+    },
+    {
+      "name": "card_1x2_display_name",
+      "value": "Task list"
+    },
+    {
+      "name": "card_1x2_desc",
+      "value": "Show added tasks"
+    },
+    {
+      "name": "card_2x2_display_name",
+      "value": "Task progress"
+    },
+    {
+      "name": "card_2x2_desc",
+      "value": "Show task completion progress"
+    },
+    {
+      "name": "card_no_task",
+      "value": "No tasks"
+    },
+    {
+      "name": "card_done",
+      "value": "Done"
+    },
+    {
+      "name": "card_undone",
+      "value": "Undone"
     }
   ]
 }

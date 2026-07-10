@@ -4,6 +4,8 @@
     "pages/MainTab",
     "pages/AchievementPage",
     "pages/TaskAddPage",
-    "pages/TaskEditPage"
+    "pages/TaskEditPage",
+    "card/widget/WidgetCard1x2",
+    "card/widget/WidgetCard2x2"
   ]
 }

@@ -1,3 +1,34 @@
 {
-  "forms": []
+  "forms": [
+    {
+      "name": "card_1x2",
+      "displayName": "$string:card_1x2_display_name",
+      "description": "$string:card_1x2_desc",
+      "src": "./ets/card/widget/WidgetCard1x2.ets",
+      "uiSyntax": "arkts",
+      "isDefault": true,
+      "isDynamic": true,
+      "updateEnabled": true,
+      "scheduledUpdateTime": "00:00",
+      "updateDuration": 0,
+      "defaultDimension": "1*2",
+      "supportDimensions": ["1*2"],
+      "formConfigAbility": "ability://EntryAbility"
+    },
+    {
+      "name": "card_2x2",
+      "displayName": "$string:card_2x2_display_name",
+      "description": "$string:card_2x2_desc",
+      "src": "./ets/card/widget/WidgetCard2x2.ets",
+      "uiSyntax": "arkts",
+      "isDefault": false,
+      "isDynamic": true,
+      "updateEnabled": true,
+      "scheduledUpdateTime": "00:00",
+      "updateDuration": 0,
+      "defaultDimension": "2*2",
+      "supportDimensions": ["2*2"],
+      "formConfigAbility": "ability://EntryAbility"
+    }
+  ]
 }
