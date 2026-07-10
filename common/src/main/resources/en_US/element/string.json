@@ -199,6 +199,10 @@
     {
       "name": "select_action",
       "value": "Select an action"
+    },
+    {
+      "name": "no_records",
+      "value": "No check-in records for this day"
     }
   ]
 }

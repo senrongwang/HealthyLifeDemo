@@ -169,6 +169,27 @@ export class PrefsHelper {
     await p.flush();
   }
 
+  public async getHistorySeeded(): Promise<boolean> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return false;
+    }
+    const v = await p.get(Constants.PREF_KEY_HISTORY_SEEDED, false);
+    if (typeof v === 'boolean') {
+      return v;
+    }
+    return false;
+  }
+
+  public async setHistorySeeded(value: boolean): Promise<void> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return;
+    }
+    await p.put(Constants.PREF_KEY_HISTORY_SEEDED, value);
+    await p.flush();
+  }
+
   private static parseAchievements(str: string): number[] {
     if (str.length === 0) {
       return [];

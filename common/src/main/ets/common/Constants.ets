@@ -10,6 +10,7 @@ export class Constants {
   public static readonly PREF_KEY_ACHIEVEMENTS: string = 'achievements_unlocked';
   public static readonly PREF_KEY_FIRST_LAUNCH: string = 'first_launch';
   public static readonly PREF_KEY_CURRENT_DATE: string = 'current_date';
+  public static readonly PREF_KEY_HISTORY_SEEDED: string = 'history_seeded';
 
   public static readonly APP_KEY_CURRENT_DATE: string = 'currentDate';
   public static readonly APP_KEY_STREAK: string = 'streakDays';

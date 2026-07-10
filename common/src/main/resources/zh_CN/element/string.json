@@ -1,8 +1,12 @@
 {
   "string": [
     {
-      "name": "healthy_life",
+      "name": "module_desc",
       "value": "健康生活"
+    },
+    {
+      "name": "no_records",
+      "value": "当日暂无打卡记录"
     },
     {
       "name": "target_progress",

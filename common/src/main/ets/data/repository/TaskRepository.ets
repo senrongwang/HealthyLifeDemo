@@ -29,6 +29,7 @@ export class TaskRepository {
     if (cur.length === 0) {
       await this.pref.setCurrentDate(DateUtils.today());
     }
+    await this.seedHistoryComplete();
     Logger.info('TaskRepository initialized');
   }
 
@@ -277,6 +278,41 @@ export class TaskRepository {
     }
   }
 
+  public async seedHistoryComplete(): Promise<void> {
+    const store: relationalStore.RdbStore | null = this.rdbStore;
+    if (store === null) {
+      return;
+    }
+    const seeded: boolean = await this.pref.getHistorySeeded();
+    if (seeded) {
+      return;
+    }
+    const today: string = DateUtils.today();
+    const date1: string = DateUtils.addDays(today, -2);
+    const date2: string = DateUtils.addDays(today, -1);
+    const tasks: TaskInfo[] = await this.getTasks();
+    for (const t of tasks) {
+      const tt: number = t.taskType;
+      const tv: number = t.targetValue;
+      const sql1: string =
+        'INSERT INTO task_record(date, taskType, finNum, targetValue) ' +
+        `VALUES('${date1}', ${tt}, ${tv}, ${tv}) ` +
+        'ON CONFLICT(date, taskType) DO UPDATE SET finNum=excluded.finNum, targetValue=excluded.targetValue';
+      await store.executeSql(sql1);
+      const sql2: string =
+        'INSERT INTO task_record(date, taskType, finNum, targetValue) ' +
+        `VALUES('${date2}', ${tt}, ${tv}, ${tv}) ` +
+        'ON CONFLICT(date, taskType) DO UPDATE SET finNum=excluded.finNum, targetValue=excluded.targetValue';
+      await store.executeSql(sql2);
+    }
+    await this.pref.setStreak(2);
+    await this.pref.setLastCompleteDate(date2);
+    await this.pref.setTotalDays(2);
+    await this.pref.setHighestStreak(2);
+    await this.pref.setHistorySeeded(true);
+    Logger.info(`seedHistoryComplete: ${date1}, ${date2}`);
+  }
+
   private async ensureRecord(date: string, taskType: TaskType, targetValue: number): Promise<void> {
     const store: relationalStore.RdbStore | null = this.rdbStore;
     if (store === null) {
@@ -288,6 +324,10 @@ export class TaskRepository {
       `VALUES('${date}', ${tt}, 0, ${targetValue}) ` +
       'ON CONFLICT(date, taskType) DO UPDATE SET targetValue=excluded.targetValue';
     await store.executeSql(sql);
+  }
+
+  public async getRecordsByDate(date: string): Promise<TaskRecord[]> {
+    return await this.queryRecordsByDate(date);
   }
 
   private async queryRecordsByDate(date: string): Promise<TaskRecord[]> {

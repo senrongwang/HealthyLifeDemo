@@ -1,7 +1,7 @@
 import { promptAction, display } from '@kit.ArkUI';
 import { HomeViewModel } from '../../viewmodel/HomeViewModel';
 import { AchievementViewModel } from '../../viewmodel/AchievementViewModel';
-import { TaskInfo, TaskRecord, TaskType, TaskConstants, DateUtils, AchievementInfo, Logger, Constants } from 'common';
+import { TaskInfo, TaskRecord, TaskType, TaskConstants, DateUtils, AchievementInfo, Logger, Constants, TaskRepository } from 'common';
 import { AchievementDialog } from '../dialog/AchievementDialog';
 import { TaskListItem } from './TaskListItem';
 import { ProgressRing } from './ProgressRing';
@@ -21,9 +21,10 @@ export struct HomeTab {
   private achDialogId: number = -1;
   @State showClockInDialog: boolean = false;
   @State clockInTaskType: TaskType = TaskType.GETUP;
-  @State calSelectedDate: string = DateUtils.today();
   @State showTaskActionSheet: boolean = false;
   @State actionSheetTaskType: TaskType = TaskType.GETUP;
+  @Watch('onSelectedDateChange') @State calSelectedDate: string = DateUtils.today();
+  @State selectedDateRecords: TaskRecord[] = [];
   @StorageLink('statusBarHeight') statusBarHeight: number = 0;
   @State topSafeHeight: number = 0;
 
@@ -94,6 +95,26 @@ export struct HomeTab {
     }
   }
 
+  onSelectedDateChange(): void {
+    this.loadSelectedDateRecords();
+  }
+
+  private async loadSelectedDateRecords(): Promise<void> {
+    if (this.calSelectedDate === DateUtils.today()) {
+      this.selectedDateRecords = [];
+      return;
+    }
+    try {
+      this.selectedDateRecords = await TaskRepository.getInstance().getRecordsByDate(this.calSelectedDate);
+    } catch (e) {
+      Logger.error('HomeTab loadSelectedDateRecords failed');
+    }
+  }
+
+  private isViewingToday(): boolean {
+    return this.calSelectedDate === DateUtils.today();
+  }
+
   private getOpenTaskCount(): number {
     let count: number = 0;
     for (const t of this.taskList) {
@@ -105,12 +126,13 @@ export struct HomeTab {
   }
 
   private getProgress(): number {
-    const total: number = this.getOpenTaskCount();
+    const total: number = this.isViewingToday() ? this.getOpenTaskCount() : this.getVisibleTaskCount();
     if (total === 0) {
       return 0;
     }
+    const records: TaskRecord[] = this.isViewingToday() ? this.todayRecords : this.selectedDateRecords;
     let done: number = 0;
-    for (const r of this.todayRecords) {
+    for (const r of records) {
       if (r.isDone) {
         done++;
       }
@@ -119,7 +141,8 @@ export struct HomeTab {
   }
 
   private findRecord(taskType: TaskType): TaskRecord | null {
-    for (const r of this.todayRecords) {
+    const records: TaskRecord[] = this.isViewingToday() ? this.todayRecords : this.selectedDateRecords;
+    for (const r of records) {
       if (r.taskType === taskType) {
         return r;
       }
@@ -145,6 +168,26 @@ export struct HomeTab {
       }
     }
     return openTasks;
+  }
+
+  private getVisibleTasks(): TaskInfo[] {
+    if (this.isViewingToday()) {
+      return this.getOpenTasks();
+    }
+    const result: TaskInfo[] = [];
+    for (const t of this.taskList) {
+      for (const r of this.selectedDateRecords) {
+        if (r.taskType === t.taskType) {
+          result.push(t);
+          break;
+        }
+      }
+    }
+    return result;
+  }
+
+  private getVisibleTaskCount(): number {
+    return this.getVisibleTasks().length;
   }
 
   private openTaskActionSheet(task: TaskInfo): void {
@@ -219,12 +262,12 @@ export struct HomeTab {
           })
 
         Column() {
-          if (this.getOpenTaskCount() === 0) {
+          if (this.getVisibleTaskCount() === 0) {
             Column() {
               Image($r('app.media.ic_no_data'))
                 .width($r('app.float.default_88'))
                 .height($r('app.float.default_88'))
-              Text($r('app.string.no_task'))
+              Text(this.isViewingToday() ? $r('app.string.no_task') : $r('app.string.no_records'))
                 .fontSize($r('app.float.default_14'))
                 .fontColor('#999999')
                 .margin({ top: $r('app.float.default_8') })
@@ -234,18 +277,22 @@ export struct HomeTab {
             .layoutWeight(1)
           } else {
             List() {
-              ForEach(this.getOpenTasks(), (task: TaskInfo) => {
+              ForEach(this.getVisibleTasks(), (task: TaskInfo) => {
                 ListItem() {
                   TaskListItem({
                     task: task,
                     isDone: this.recordIsDone(task.taskType),
                     finNum: this.recordFinNum(task.taskType),
                     onItemClick: (t: TaskInfo) => {
-                      this.clockInTaskType = t.taskType;
-                      this.showClockInDialog = true;
+                      if (this.isViewingToday()) {
+                        this.clockInTaskType = t.taskType;
+                        this.showClockInDialog = true;
+                      }
                     },
                     onItemLongPress: (t: TaskInfo) => {
-                      this.openTaskActionSheet(t);
+                      if (this.isViewingToday()) {
+                        this.openTaskActionSheet(t);
+                      }
                     }
                   })
                 }
