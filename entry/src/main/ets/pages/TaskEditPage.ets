@@ -1,4 +1,6 @@
 import { display, router } from '@kit.ArkUI';
+import { reminderAgentManager } from '@kit.BackgroundTasksKit';
+import { notificationManager } from '@kit.NotificationKit';
 import { TaskType, TaskFlag, TaskInfo, TaskConstants, TaskMeta, TaskRepository, isReminderSupported, Logger, Constants } from 'common';
 import { TargetPickerDialog } from '../view/dialog/TargetPickerDialog';
 
@@ -7,6 +9,7 @@ interface RouteParams {
   isAdd: boolean;
 }
 
+@Preview
 @Entry
 @Component
 struct TaskEditPage {
@@ -58,10 +61,72 @@ struct TaskEditPage {
       const repo: TaskRepository = TaskRepository.getInstance();
       const tasks: TaskInfo[] = await repo.getTasks();
       AppStorage.setOrCreate('taskList', tasks);
+      await this.syncSystemReminder();
       Logger.info(`TaskEditPage save taskType=${this.task.taskType}`);
       router.back();
     } catch (e) {
       Logger.error('TaskEditPage save failed');
+    }
+  }
+
+  private async syncSystemReminder(): Promise<void> {
+    if (!this.isReminderType()) {
+      return;
+    }
+
+    const taskType: TaskType = this.task.taskType;
+    const reminderIdKey: string = `reminderId_${taskType}`;
+    const existingId: number | undefined = AppStorage.get<number>(reminderIdKey);
+    if (existingId !== undefined) {
+      try {
+        await reminderAgentManager.cancelReminder(existingId);
+      } catch (e) {
+        Logger.error('TaskEditPage cancel reminder failed');
+      }
+    }
+
+    if (!this.task.reminderEnable) {
+      return;
+    }
+
+    const parts: string[] = this.task.reminderTime.split(':');
+    const hour: number = parts.length >= 1 ? parseInt(parts[0], 10) : 8;
+    const minute: number = parts.length >= 2 ? parseInt(parts[1], 10) : 0;
+    const now: Date = new Date();
+
+    let title: string = '健康提醒';
+    let content: string = '该打卡啦';
+    if (taskType === TaskType.GETUP) {
+      title = '早起提醒';
+      content = '该起床啦，开启美好的一天';
+    } else if (taskType === TaskType.SLEEP) {
+      title = '早睡提醒';
+      content = '该睡觉啦，注意休息';
+    }
+
+    const reminder: reminderAgentManager.ReminderRequestCalendar = {
+      reminderType: reminderAgentManager.ReminderType.REMINDER_TYPE_CALENDAR,
+      dateTime: {
+        year: now.getFullYear(),
+        month: now.getMonth() + 1,
+        day: now.getDate(),
+        hour: hour,
+        minute: minute,
+        second: 0
+      },
+      daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
+      title: title,
+      content: content,
+      notificationId: taskType + 1,
+      slotType: notificationManager.SlotType.SERVICE_INFORMATION
+    };
+
+    try {
+      const newId: number = await reminderAgentManager.publishReminder(reminder);
+      AppStorage.setOrCreate<number>(reminderIdKey, newId);
+      Logger.info(`TaskEditPage publish reminder taskType=${taskType} time=${this.task.reminderTime} id=${newId}`);
+    } catch (e) {
+      Logger.error('TaskEditPage publish reminder failed');
     }
   }
 
@@ -121,6 +186,7 @@ struct TaskEditPage {
             Toggle({ type: ToggleType.Switch, isOn: this.task.reminderEnable })
               .onChange((isOn: boolean) => {
                 this.task.reminderEnable = isOn;
+                this.syncSystemReminder();
               })
           }
         }
@@ -232,6 +298,9 @@ struct TaskEditPage {
           const hh: string = value1 < 10 ? '0' + value1 : '' + value1;
           const mm: string = value2 < 10 ? '0' + value2 : '' + value2;
           this.task.reminderTime = `${hh}:${mm}`;
+          if (this.task.reminderEnable) {
+            this.syncSystemReminder();
+          }
         } else {
           this.task.targetValue = value1 + 1;
         }
