@@ -294,6 +294,7 @@ export class TaskRepository {
     for (const t of tasks) {
       const tt: number = t.taskType;
       const tv: number = t.targetValue;
+      await store.executeSql(`UPDATE task SET isOpen=1 WHERE taskType=${tt}`);
       const sql1: string =
         'INSERT INTO task_record(date, taskType, finNum, targetValue) ' +
         `VALUES('${date1}', ${tt}, ${tv}, ${tv}) ` +

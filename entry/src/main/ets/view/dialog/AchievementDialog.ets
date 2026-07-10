@@ -2,8 +2,15 @@
 export struct AchievementDialog {
   @StorageLink('achDialogIcon') achIcon: Resource = $r('app.media.ic_badge_3_on');
   @StorageLink('achDialogDays') achDays: number = 0;
-  @StorageLink('achDialogScale') achScale: number = 0.3;
-  @StorageLink('achDialogOpacity') achOpacity: number = 0;
+  @State scaleValue: number = 0.3;
+  @State opacityValue: number = 0;
+
+  aboutToAppear(): void {
+    animateTo({ duration: 300, curve: Curve.EaseOut }, () => {
+      this.scaleValue = 1.0;
+      this.opacityValue = 1.0;
+    });
+  }
 
   build(): void {
     Column() {
@@ -12,8 +19,8 @@ export struct AchievementDialog {
           .width(80)
           .height(80)
           .objectFit(ImageFit.Contain)
-          .scale({ x: this.achScale, y: this.achScale })
-          .opacity(this.achOpacity)
+          .scale({ x: this.scaleValue, y: this.scaleValue })
+          .opacity(this.opacityValue)
 
         Text($r('app.string.achievement_level', this.achDays.toString()))
           .fontSize($r('app.float.default_18'))

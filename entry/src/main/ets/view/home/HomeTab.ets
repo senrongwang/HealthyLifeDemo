@@ -1,4 +1,4 @@
-import { promptAction, display } from '@kit.ArkUI';
+import { display } from '@kit.ArkUI';
 import { HomeViewModel } from '../../viewmodel/HomeViewModel';
 import { AchievementViewModel } from '../../viewmodel/AchievementViewModel';
 import { TaskInfo, TaskRecord, TaskType, TaskConstants, DateUtils, AchievementInfo, Logger, Constants, TaskRepository } from 'common';
@@ -17,8 +17,7 @@ export struct HomeTab {
   @StorageLink('todayAllDone') todayAllDone: boolean = false;
   @Watch('onAchDialogShow') @StorageLink('achDialogShow') achDialogShow: boolean = false;
   @StorageLink('achDialogDays') achDialogDays: number = 0;
-  @State achDialogCounter: number = 0;
-  private achDialogId: number = -1;
+  @State showAchDialog: boolean = false;
   @State showClockInDialog: boolean = false;
   @State clockInTaskType: TaskType = TaskType.GETUP;
   @State showTaskActionSheet: boolean = false;
@@ -30,10 +29,10 @@ export struct HomeTab {
 
   aboutToAppear(): void {
     AppStorage.setOrCreate('achDialogShow', false);
-    AppStorage.setOrCreate('achDialogScale', 0.3);
-    AppStorage.setOrCreate('achDialogOpacity', 0);
+    AppStorage.setOrCreate('achDialogIcon', $r('app.media.ic_badge_3_on'));
     this.calcTopSafeHeight();
     this.loadData();
+    new AchievementViewModel().loadAchievements();
   }
 
   private calcTopSafeHeight(): void {
@@ -47,34 +46,9 @@ export struct HomeTab {
 
   onAchDialogShow(): void {
     if (this.achDialogShow) {
-      const list: AchievementInfo[] = AppStorage.get<AchievementInfo[]>('achievementList') || [];
-      let icon: Resource = $r('app.media.ic_badge_3_on');
-      for (const info of list) {
-        if (info.days === this.achDialogDays) {
-          icon = info.iconOn;
-          break;
-        }
-      }
-      AppStorage.set('achDialogIcon', icon);
-      AppStorage.set('achDialogScale', 0.3);
-      AppStorage.set('achDialogOpacity', 0);
-      this.achDialogCounter++;
-      promptAction.openCustomDialog({
-        builder: this.achievementDialogBuilder(),
-        autoCancel: false,
-        alignment: DialogAlignment.Center
-      }).then((dialogId: number) => {
-        this.achDialogId = dialogId;
-        animateTo({ duration: 300, curve: Curve.EaseOut }, () => {
-          AppStorage.set('achDialogScale', 1.0);
-          AppStorage.set('achDialogOpacity', 1.0);
-        });
-      });
+      this.showAchDialog = true;
     } else {
-      if (this.achDialogId >= 0) {
-        promptAction.closeCustomDialog(this.achDialogId);
-        this.achDialogId = -1;
-      }
+      this.showAchDialog = false;
       const achVM: AchievementViewModel = new AchievementViewModel();
       setTimeout(() => {
         achVM.loadAchievements();
@@ -314,6 +288,7 @@ export struct HomeTab {
       .height('100%')
       .backgroundColor('#F2F3F5')
       .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
+      .bindContentCover($$this.showAchDialog, this.achievementDialogBuilder())
 
       Stack() {
         Text('+')

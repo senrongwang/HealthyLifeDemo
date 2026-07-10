@@ -1,4 +1,4 @@
-import { TaskInfo, TaskRecord, DayProgress, TaskType, TaskRepository, Constants, DateUtils, Logger } from 'common';
+import { TaskInfo, TaskRecord, DayProgress, TaskType, TaskRepository, Constants, DateUtils, Logger, AchievementInfo } from 'common';
 
 export class HomeViewModel {
   public taskList: TaskInfo[] = [];
@@ -13,6 +13,8 @@ export class HomeViewModel {
     this.todayProgress = new DayProgress(today, DateUtils.getWeekIndexByStr(today));
     this.refreshProgress();
     await this.refreshAllDone();
+    const streak: number = await repo.getStreak();
+    AppStorage.setOrCreate(Constants.APP_KEY_STREAK, streak);
     AppStorage.setOrCreate(Constants.APP_KEY_TASK_LIST, this.taskList);
     AppStorage.setOrCreate(Constants.APP_KEY_TODAY_RECORDS, this.todayRecords);
     AppStorage.setOrCreate(Constants.APP_KEY_CURRENT_DATE, today);
@@ -81,6 +83,15 @@ export class HomeViewModel {
   }
 
   private showAchievementDialog(days: number): void {
+    const list: AchievementInfo[] = AppStorage.get<AchievementInfo[]>('achievementList') || [];
+    let icon: Resource = $r('app.media.ic_badge_3_on');
+    for (const info of list) {
+      if (info.days === days) {
+        icon = info.iconOn;
+        break;
+      }
+    }
+    AppStorage.setOrCreate('achDialogIcon', icon);
     AppStorage.setOrCreate('achDialogDays', days);
     AppStorage.setOrCreate('achDialogShow', true);
     Logger.info('achievement unlocked: ' + days.toString() + ' days');
