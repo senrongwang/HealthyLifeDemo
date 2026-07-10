@@ -1,6 +1,10 @@
-import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
+import { AbilityConstant, ConfigurationConstant, UIAbility, Want, common } from '@kit.AbilityKit';
 import { window, display } from '@kit.ArkUI';
+import { calendarManager } from '@kit.CalendarKit';
 import { Constants, DateUtils, TaskRepository, Logger } from 'common';
+
+export let calendarMgr: calendarManager.CalendarManager | null = null;
+export let appContext: common.UIAbilityContext | null = null;
 
 export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
@@ -9,6 +13,8 @@ export default class EntryAbility extends UIAbility {
     } catch (e) {
       Logger.error('EntryAbility setColorMode failed');
     }
+    calendarMgr = calendarManager.getCalendarManager(this.context);
+    appContext = this.context;
     Logger.info('EntryAbility onCreate');
   }
 

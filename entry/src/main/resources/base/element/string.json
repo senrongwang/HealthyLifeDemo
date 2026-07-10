@@ -11,6 +11,10 @@
     {
       "name": "EntryAbility_label",
       "value": "Healthy life"
+    },
+    {
+      "name": "calendar_reason",
+      "value": "用于将健康任务提醒写入系统日历"
     }
   ]
 }

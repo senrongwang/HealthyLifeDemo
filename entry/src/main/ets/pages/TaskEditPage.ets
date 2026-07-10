@@ -1,12 +1,21 @@
 import { display, router } from '@kit.ArkUI';
 import { reminderAgentManager } from '@kit.BackgroundTasksKit';
 import { notificationManager } from '@kit.NotificationKit';
-import { TaskType, TaskFlag, TaskInfo, TaskConstants, TaskMeta, TaskRepository, isReminderSupported, Logger, Constants } from 'common';
+import { calendarManager } from '@kit.CalendarKit';
+import { abilityAccessCtrl, Permissions, PermissionRequestResult } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { TaskType, TaskFlag, TaskInfo, TaskConstants, TaskMeta, TaskRepository, Logger, Constants } from 'common';
+import { calendarMgr, appContext } from '../entryability/EntryAbility';
 import { TargetPickerDialog } from '../view/dialog/TargetPickerDialog';
 
 interface RouteParams {
   taskType: number;
   isAdd: boolean;
+}
+
+interface ReminderText {
+  title: string;
+  content: string;
 }
 
 @Preview
@@ -61,7 +70,7 @@ struct TaskEditPage {
       const repo: TaskRepository = TaskRepository.getInstance();
       const tasks: TaskInfo[] = await repo.getTasks();
       AppStorage.setOrCreate('taskList', tasks);
-      await this.syncSystemReminder();
+      await this.syncReminder();
       Logger.info(`TaskEditPage save taskType=${this.task.taskType}`);
       router.back();
     } catch (e) {
@@ -69,8 +78,20 @@ struct TaskEditPage {
     }
   }
 
+  private isAlarmType(): boolean {
+    return this.task.taskType === TaskType.GETUP || this.task.taskType === TaskType.SLEEP;
+  }
+
+  private async syncReminder(): Promise<void> {
+    if (this.isAlarmType()) {
+      await this.syncSystemReminder();
+    } else {
+      await this.syncCalendarEvent();
+    }
+  }
+
   private async syncSystemReminder(): Promise<void> {
-    if (!this.isReminderType()) {
+    if (!this.isAlarmType()) {
       return;
     }
 
@@ -93,16 +114,7 @@ struct TaskEditPage {
     const hour: number = parts.length >= 1 ? parseInt(parts[0], 10) : 8;
     const minute: number = parts.length >= 2 ? parseInt(parts[1], 10) : 0;
     const now: Date = new Date();
-
-    let title: string = '健康提醒';
-    let content: string = '该打卡啦';
-    if (taskType === TaskType.GETUP) {
-      title = '早起提醒';
-      content = '该起床啦，开启美好的一天';
-    } else if (taskType === TaskType.SLEEP) {
-      title = '早睡提醒';
-      content = '该睡觉啦，注意休息';
-    }
+    const text: ReminderText = this.getReminderText();
 
     const reminder: reminderAgentManager.ReminderRequestCalendar = {
       reminderType: reminderAgentManager.ReminderType.REMINDER_TYPE_CALENDAR,
@@ -115,8 +127,8 @@ struct TaskEditPage {
         second: 0
       },
       daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
-      title: title,
-      content: content,
+      title: text.title,
+      content: text.content,
       notificationId: taskType + 1,
       slotType: notificationManager.SlotType.SERVICE_INFORMATION
     };
@@ -130,6 +142,126 @@ struct TaskEditPage {
     }
   }
 
+  private async syncCalendarEvent(): Promise<void> {
+    if (this.isAlarmType()) {
+      return;
+    }
+
+    const taskType: TaskType = this.task.taskType;
+    const eventIdKey: string = `calendarEventId_${taskType}`;
+    const existingId: number | undefined = AppStorage.get<number>(eventIdKey);
+    if (existingId !== undefined && existingId >= 0) {
+      const calOld: calendarManager.Calendar | null = await this.getCalendar();
+      if (calOld !== null) {
+        try {
+          await calOld.deleteEvent(existingId);
+        } catch (e) {
+          Logger.error('TaskEditPage delete calendar event failed');
+        }
+      }
+    }
+    AppStorage.setOrCreate<number>(eventIdKey, -1);
+
+    if (!this.task.reminderEnable) {
+      return;
+    }
+
+    if (!await this.ensureCalendarPermission()) {
+      Logger.error('TaskEditPage calendar permission denied');
+      return;
+    }
+
+    const cal: calendarManager.Calendar | null = await this.getCalendar();
+    if (cal === null) {
+      return;
+    }
+
+    const parts: string[] = this.task.reminderTime.split(':');
+    const hour: number = parts.length >= 1 ? parseInt(parts[0], 10) : 8;
+    const minute: number = parts.length >= 2 ? parseInt(parts[1], 10) : 0;
+    const now: Date = new Date();
+    const start: number = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0).getTime();
+    const end: number = start + 60 * 60 * 1000;
+    const text: ReminderText = this.getReminderText();
+
+    const event: calendarManager.Event = {
+      type: calendarManager.EventType.NORMAL,
+      title: text.title,
+      description: text.content,
+      startTime: start,
+      endTime: end,
+      reminderTime: [0],
+      recurrenceRule: {
+        recurrenceFrequency: calendarManager.RecurrenceFrequency.DAILY,
+        interval: 1
+      }
+    };
+
+    try {
+      const id: number = await cal.addEvent(event);
+      AppStorage.setOrCreate<number>(eventIdKey, id);
+      Logger.info(`TaskEditPage publish calendar event taskType=${taskType} time=${this.task.reminderTime} id=${id}`);
+    } catch (e) {
+      Logger.error('TaskEditPage publish calendar event failed');
+    }
+  }
+
+  private getCalendar(): Promise<calendarManager.Calendar | null> {
+    return new Promise<calendarManager.Calendar | null>((resolve: (c: calendarManager.Calendar | null) => void): void => {
+      if (calendarMgr === null) {
+        resolve(null);
+        return;
+      }
+      calendarMgr.getCalendar((err: BusinessError, data: calendarManager.Calendar): void => {
+        if (err) {
+          Logger.error('TaskEditPage getCalendar failed');
+          resolve(null);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+  }
+
+  private async ensureCalendarPermission(): Promise<boolean> {
+    if (appContext === null) {
+      return false;
+    }
+    const atManager: abilityAccessCtrl.AtManager = abilityAccessCtrl.createAtManager();
+    const perms: Array<Permissions> = ['ohos.permission.READ_CALENDAR', 'ohos.permission.WRITE_CALENDAR'];
+    try {
+      const result: PermissionRequestResult = await atManager.requestPermissionsFromUser(appContext, perms);
+      for (const r of result.authResults) {
+        if (r !== 0) {
+          return false;
+        }
+      }
+      return true;
+    } catch (e) {
+      Logger.error('TaskEditPage request calendar permission failed');
+      return false;
+    }
+  }
+
+  private getReminderText(): ReminderText {
+    switch (this.task.taskType) {
+      case TaskType.GETUP:
+        return { title: '早起提醒', content: '该起床啦，开启美好的一天' };
+      case TaskType.SLEEP:
+        return { title: '早睡提醒', content: '该睡觉啦，注意休息' };
+      case TaskType.DRINK:
+        return { title: '喝水提醒', content: '该喝水啦，记得补充水分' };
+      case TaskType.APPLE:
+        return { title: '吃苹果提醒', content: '一天一苹果，医生远离我' };
+      case TaskType.SMILE:
+        return { title: '每日微笑提醒', content: '笑一笑，十年少' };
+      case TaskType.BRUSH:
+        return { title: '刷牙提醒', content: '该刷牙啦，保持口腔清洁' };
+      default:
+        return { title: '健康提醒', content: '该打卡啦' };
+    }
+  }
+
   private calcTopSafeHeight(): void {
     try {
       const d: display.Display = display.getDefaultDisplaySync();
@@ -140,7 +272,7 @@ struct TaskEditPage {
   }
 
   private isReminderType(): boolean {
-    return isReminderSupported(this.task.taskType);
+    return true;
   }
 
   private isMultiType(): boolean {
@@ -186,7 +318,7 @@ struct TaskEditPage {
             Toggle({ type: ToggleType.Switch, isOn: this.task.reminderEnable })
               .onChange((isOn: boolean) => {
                 this.task.reminderEnable = isOn;
-                this.syncSystemReminder();
+                this.syncReminder();
               })
           }
         }
@@ -197,7 +329,7 @@ struct TaskEditPage {
 
         if (this.isReminderType()) {
           Row() {
-            Text($r('app.string.target_setting'))
+            Text('提醒时间')
               .fontSize($r('app.float.default_16'))
               .fontColor('#333333')
               .layoutWeight(1)
@@ -299,7 +431,7 @@ struct TaskEditPage {
           const mm: string = value2 < 10 ? '0' + value2 : '' + value2;
           this.task.reminderTime = `${hh}:${mm}`;
           if (this.task.reminderEnable) {
-            this.syncSystemReminder();
+            this.syncReminder();
           }
         } else {
           this.task.targetValue = value1 + 1;
