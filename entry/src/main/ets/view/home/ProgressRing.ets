@@ -17,7 +17,7 @@ export struct ProgressRing {
         .backgroundColor('#E0E0E0')
 
       Text(`${this.progress}%`)
-        .fontSize($r('app.float.default_18'))
+        .fontSize($r('app.float.default_36'))
         .fontColor('#FF6B00')
         .fontWeight(FontWeight.Bold)
     }
