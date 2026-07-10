@@ -78,9 +78,10 @@ export class TaskRepository {
       return;
     }
     const tt: number = taskType;
-    await store.executeSql(`DELETE FROM task_record WHERE taskType=${tt}`);
+    const today: string = DateUtils.today();
+    await store.executeSql(`DELETE FROM task_record WHERE taskType=${tt} AND date >= '${today}'`);
     await store.executeSql(`DELETE FROM task WHERE taskType=${tt}`);
-    Logger.info(`deleteTask(physical) taskType=${tt}`);
+    Logger.info(`deleteTask taskType=${tt} (today/future records cleared, history kept)`);
   }
 
   public async getTodayRecords(): Promise<TaskRecord[]> {
@@ -95,7 +96,17 @@ export class TaskRepository {
         await this.ensureRecord(today, t.taskType, t.targetValue);
       }
     }
-    return await this.queryRecordsByDate(today);
+    const all: TaskRecord[] = await this.queryRecordsByDate(today);
+    const result: TaskRecord[] = [];
+    for (const r of all) {
+      for (const t of tasks) {
+        if (t.isOpen && t.taskType === r.taskType) {
+          result.push(r);
+          break;
+        }
+      }
+    }
+    return result;
   }
 
   public async clockIn(taskType: TaskType): Promise<TaskRecord | null> {
@@ -164,6 +175,20 @@ export class TaskRepository {
     if (store === null) {
       return dp;
     }
+    const records: TaskRecord[] = await this.queryRecordsByDate(date);
+    const today: string = DateUtils.today();
+    if (DateUtils.compareDate(date, today) < 0) {
+      dp.totalCount = records.length;
+      let donePast: number = 0;
+      for (const r of records) {
+        if (r.isDone) {
+          donePast++;
+        }
+      }
+      dp.doneCount = donePast;
+      dp.isAllDone = records.length > 0 && donePast >= records.length;
+      return dp;
+    }
     const tasks: TaskInfo[] = await this.getTasks();
     let total: number = 0;
     for (const t of tasks) {
@@ -172,11 +197,15 @@ export class TaskRepository {
       }
     }
     dp.totalCount = total;
-    const records: TaskRecord[] = await this.queryRecordsByDate(date);
     let done: number = 0;
-    for (const r of records) {
-      if (r.isDone) {
-        done++;
+    for (const t of tasks) {
+      if (t.isOpen) {
+        for (const r of records) {
+          if (r.taskType === t.taskType && r.isDone) {
+            done++;
+            break;
+          }
+        }
       }
     }
     dp.doneCount = done;

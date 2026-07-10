@@ -1,4 +1,4 @@
-import { DayProgress, DateUtils, Logger } from 'common';
+import { DayProgress, DateUtils, Logger, TaskRecord, TaskInfo } from 'common';
 import { HistoryViewModel } from '../../viewmodel/HistoryViewModel';
 
 @Component
@@ -7,6 +7,8 @@ export struct WeekCalendar {
   @State weekOffset: number = 0;
   @State weekDates: string[] = [];
   @State weekProgress: DayProgress[] = [];
+  @StorageLink('todayRecords') @Watch('onRecordsChange') todayRecords: TaskRecord[] = [];
+  @StorageLink('taskList') @Watch('onRecordsChange') taskList: TaskInfo[] = [];
   private historyVM: HistoryViewModel = new HistoryViewModel();
   private weekLabels: string[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -15,6 +17,10 @@ export struct WeekCalendar {
     if (this.selectedDate.length === 0) {
       this.selectedDate = DateUtils.today();
     }
+    this.loadData();
+  }
+
+  private onRecordsChange(): void {
     this.loadData();
   }
 
@@ -58,6 +64,37 @@ export struct WeekCalendar {
       return false;
     }
     return dp.isAllDone;
+  }
+
+  private isTodayAllDone(): boolean {
+    let total: number = 0;
+    for (const t of this.taskList) {
+      if (t.isOpen) {
+        total++;
+      }
+    }
+    if (total === 0) {
+      return false;
+    }
+    let done: number = 0;
+    for (const r of this.todayRecords) {
+      if (r.isDone) {
+        for (const t of this.taskList) {
+          if (t.isOpen && t.taskType === r.taskType) {
+            done++;
+            break;
+          }
+        }
+      }
+    }
+    return done >= total;
+  }
+
+  private badgeAllDone(date: string): boolean {
+    if (DateUtils.compareDate(date, DateUtils.today()) === 0) {
+      return this.isTodayAllDone();
+    }
+    return this.isAllDone(date);
   }
 
   build(): void {
@@ -123,7 +160,7 @@ export struct WeekCalendar {
   dayBadge(date: string, _idx: number): void {
     Stack() {
       if (this.findProgress(date) !== null) {
-        Image(this.isAllDone(date)
+        Image(this.badgeAllDone(date)
           ? $r('app.media.ic_home_all_done')
           : $r('app.media.ic_home_undone'))
           .width($r('app.float.default_36'))
