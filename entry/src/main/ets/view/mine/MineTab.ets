@@ -1,9 +1,21 @@
+import { display } from '@kit.ArkUI';
 import { MineViewModel } from '../../viewmodel/MineViewModel';
+import { Constants } from 'common';
 
 @Component
 export struct MineTab {
   private mineVM: MineViewModel = new MineViewModel();
   @State menuItems: number[] = [0, 1, 2];
+  @State topSafeHeight: number = 0;
+
+  aboutToAppear(): void {
+    try {
+      const d: display.Display = display.getDefaultDisplaySync();
+      this.topSafeHeight = Math.floor(d.height * Constants.TOP_SAFE_AREA_RATIO);
+    } catch (e) {
+      this.topSafeHeight = 40;
+    }
+  }
 
   build(): void {
     Column() {
@@ -77,5 +89,6 @@ export struct MineTab {
     .width('100%')
     .height('100%')
     .backgroundColor('#F2F3F5')
+    .padding({ top: this.topSafeHeight })
   }
 }

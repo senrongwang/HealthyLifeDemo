@@ -1,7 +1,7 @@
-import { promptAction } from '@kit.ArkUI';
+import { promptAction, display } from '@kit.ArkUI';
 import { HomeViewModel } from '../../viewmodel/HomeViewModel';
 import { AchievementViewModel } from '../../viewmodel/AchievementViewModel';
-import { TaskInfo, TaskRecord, TaskType, TaskConstants, DateUtils, AchievementInfo, Logger } from 'common';
+import { TaskInfo, TaskRecord, TaskType, TaskConstants, DateUtils, AchievementInfo, Logger, Constants } from 'common';
 import { AchievementDialog } from '../dialog/AchievementDialog';
 import { TaskListItem } from './TaskListItem';
 import { ProgressRing } from './ProgressRing';
@@ -24,12 +24,24 @@ export struct HomeTab {
   @State calSelectedDate: string = DateUtils.today();
   @State showTaskActionSheet: boolean = false;
   @State actionSheetTaskType: TaskType = TaskType.GETUP;
+  @StorageLink('statusBarHeight') statusBarHeight: number = 0;
+  @State topSafeHeight: number = 0;
 
   aboutToAppear(): void {
     AppStorage.setOrCreate('achDialogShow', false);
     AppStorage.setOrCreate('achDialogScale', 0.3);
     AppStorage.setOrCreate('achDialogOpacity', 0);
+    this.calcTopSafeHeight();
     this.loadData();
+  }
+
+  private calcTopSafeHeight(): void {
+    try {
+      const d: display.Display = display.getDefaultDisplaySync();
+      this.topSafeHeight = Math.floor(d.height * Constants.TOP_SAFE_AREA_RATIO);
+    } catch (e) {
+      this.topSafeHeight = 40;
+    }
   }
 
   onAchDialogShow(): void {
@@ -175,9 +187,11 @@ export struct HomeTab {
           }
           .width('100%')
           .height('100%')
+          .padding({ top: this.topSafeHeight })
         }
         .width('100%')
         .height($r('app.float.default_220'))
+        .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
 
         Column() {
           WeekCalendar({ selectedDate: $calSelectedDate })
@@ -246,6 +260,7 @@ export struct HomeTab {
       .width('100%')
       .height('100%')
       .backgroundColor('#F2F3F5')
+      .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP])
 
       Stack() {
         Text('+')

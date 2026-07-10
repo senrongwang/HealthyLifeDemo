@@ -1,15 +1,26 @@
-import { router } from '@kit.ArkUI';
+import { display, router } from '@kit.ArkUI';
 import { AchievementViewModel } from '../viewmodel/AchievementViewModel';
-import { AchievementInfo, Logger } from 'common';
+import { AchievementInfo, Logger, Constants } from 'common';
 
 @Entry
 @Component
 struct AchievementPage {
   private vm: AchievementViewModel = new AchievementViewModel();
   @StorageLink('achievementList') achievementList: AchievementInfo[] = [];
+  @State topSafeHeight: number = 0;
 
   aboutToAppear(): void {
+    this.calcTopSafeHeight();
     this.loadData();
+  }
+
+  private calcTopSafeHeight(): void {
+    try {
+      const d: display.Display = display.getDefaultDisplaySync();
+      this.topSafeHeight = Math.floor(d.height * Constants.TOP_SAFE_AREA_RATIO);
+    } catch (e) {
+      this.topSafeHeight = 40;
+    }
   }
 
   private async loadData(): Promise<void> {
@@ -98,5 +109,6 @@ struct AchievementPage {
     .width('100%')
     .height('100%')
     .backgroundColor($r('app.color.ach_bg_color'))
+    .padding({ top: this.topSafeHeight })
   }
 }

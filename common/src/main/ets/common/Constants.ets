@@ -20,4 +20,6 @@ export class Constants {
   public static readonly APP_KEY_SPLASH_DONE: string = 'splashDone';
 
   public static readonly DEFAULT_REMINDER_TIME: string = '08:00';
+
+  public static readonly TOP_SAFE_AREA_RATIO: number = 0.015;
 }

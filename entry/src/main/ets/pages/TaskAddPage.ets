@@ -1,5 +1,5 @@
-import { router } from '@kit.ArkUI';
-import { TaskType, TaskInfo, TaskConstants, TaskMeta } from 'common';
+import { display, router } from '@kit.ArkUI';
+import { TaskType, TaskInfo, TaskConstants, TaskMeta, Constants } from 'common';
 
 interface TaskTypeItem {
   taskType: TaskType;
@@ -12,8 +12,10 @@ interface TaskTypeItem {
 struct TaskAddPage {
   @StorageLink('taskList') taskList: TaskInfo[] = [];
   allTypes: TaskTypeItem[] = [];
+  @State topSafeHeight: number = 0;
 
   aboutToAppear(): void {
+    this.calcTopSafeHeight();
     this.allTypes = [];
     const types: TaskType[] = [TaskType.GETUP, TaskType.DRINK, TaskType.APPLE, TaskType.SMILE, TaskType.BRUSH, TaskType.SLEEP];
     for (const t of types) {
@@ -24,6 +26,15 @@ struct TaskAddPage {
         icon: meta.taskIcon
       };
       this.allTypes.push(item);
+    }
+  }
+
+  private calcTopSafeHeight(): void {
+    try {
+      const d: display.Display = display.getDefaultDisplaySync();
+      this.topSafeHeight = Math.floor(d.height * Constants.TOP_SAFE_AREA_RATIO);
+    } catch (e) {
+      this.topSafeHeight = 40;
     }
   }
 
@@ -101,5 +112,6 @@ struct TaskAddPage {
     .width('100%')
     .height('100%')
     .backgroundColor('#F2F3F5')
+    .padding({ top: this.topSafeHeight })
   }
 }

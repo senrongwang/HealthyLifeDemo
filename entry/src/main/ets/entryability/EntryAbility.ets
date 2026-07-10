@@ -1,5 +1,5 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
-import { window } from '@kit.ArkUI';
+import { window, display } from '@kit.ArkUI';
 import { Constants, DateUtils, TaskRepository, Logger } from 'common';
 
 export default class EntryAbility extends UIAbility {
@@ -19,7 +19,7 @@ export default class EntryAbility extends UIAbility {
   onWindowStageCreate(windowStage: window.WindowStage): void {
     Logger.info('EntryAbility onWindowStageCreate');
     this.initializeAppStorage();
-    this.setWindowBackground(windowStage);
+    this.configureWindow(windowStage);
     this.initAndLoad(windowStage);
   }
 
@@ -42,12 +42,21 @@ export default class EntryAbility extends UIAbility {
     AppStorage.setOrCreate(Constants.APP_KEY_SPLASH_DONE, false);
   }
 
-  private async setWindowBackground(windowStage: window.WindowStage): Promise<void> {
+  private async configureWindow(windowStage: window.WindowStage): Promise<void> {
     try {
       const win: window.Window = await windowStage.getMainWindow();
       win.setWindowBackgroundColor('#F2F3F5');
+      await win.setWindowLayoutFullScreen(true);
+      await win.setWindowSystemBarProperties({
+        statusBarContentColor: '#000000'
+      });
+      const avoidArea: window.AvoidArea = win.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
+      const displayInfo: display.Display = display.getDefaultDisplaySync();
+      const density: number = displayInfo.densityPixels;
+      const statusBarHeightVp: number = avoidArea.topRect.height / density;
+      AppStorage.setOrCreate('statusBarHeight', statusBarHeightVp);
     } catch (e) {
-      Logger.error('EntryAbility setWindowBackground failed');
+      Logger.error('EntryAbility configureWindow failed');
     }
   }
 

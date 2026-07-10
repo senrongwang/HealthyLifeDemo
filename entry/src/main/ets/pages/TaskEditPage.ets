@@ -1,5 +1,5 @@
-import { router } from '@kit.ArkUI';
-import { TaskType, TaskFlag, TaskInfo, TaskConstants, TaskMeta, TaskRepository, isReminderSupported, Logger } from 'common';
+import { display, router } from '@kit.ArkUI';
+import { TaskType, TaskFlag, TaskInfo, TaskConstants, TaskMeta, TaskRepository, isReminderSupported, Logger, Constants } from 'common';
 import { TargetPickerDialog } from '../view/dialog/TargetPickerDialog';
 
 interface RouteParams {
@@ -17,8 +17,10 @@ struct TaskEditPage {
   @State pickerIsTimeMode: boolean = false;
   @State pickerInitVal1: number = 0;
   @State pickerInitVal2: number = 0;
+  @State topSafeHeight: number = 0;
 
   aboutToAppear(): void {
+    this.calcTopSafeHeight();
     const params: RouteParams = router.getParams() as RouteParams;
     if (params === undefined || params === null) {
       return;
@@ -60,6 +62,15 @@ struct TaskEditPage {
       router.back();
     } catch (e) {
       Logger.error('TaskEditPage save failed');
+    }
+  }
+
+  private calcTopSafeHeight(): void {
+    try {
+      const d: display.Display = display.getDefaultDisplaySync();
+      this.topSafeHeight = Math.floor(d.height * Constants.TOP_SAFE_AREA_RATIO);
+    } catch (e) {
+      this.topSafeHeight = 40;
     }
   }
 
@@ -203,6 +214,7 @@ struct TaskEditPage {
     .width('100%')
     .height('100%')
     .backgroundColor('#F2F3F5')
+    .padding({ top: this.topSafeHeight })
     .bindSheet($$this.showPicker, this.pickerBuilder(), {
       height: 340,
       dragBar: true

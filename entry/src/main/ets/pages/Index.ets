@@ -1,4 +1,4 @@
-import { router } from '@kit.ArkUI';
+import { display, router, window } from '@kit.ArkUI';
 import { Constants, PrefsHelper, Logger } from 'common';
 
 @Entry
@@ -6,12 +6,33 @@ import { Constants, PrefsHelper, Logger } from 'common';
 struct Index {
   @State countdown: number = 3;
   @State showPrivacy: boolean = false;
+  @State topSafeHeight: number = 0;
   private timerId: number = -1;
   private navigated: boolean = false;
 
   aboutToAppear(): void {
+    this.setFullScreen();
+    this.calcTopSafeHeight();
     this.checkFirstLaunch();
     this.startCountdown();
+  }
+
+  private calcTopSafeHeight(): void {
+    try {
+      const d: display.Display = display.getDefaultDisplaySync();
+      this.topSafeHeight = Math.floor(d.height * Constants.TOP_SAFE_AREA_RATIO);
+    } catch (e) {
+      this.topSafeHeight = 40;
+    }
+  }
+
+  private async setFullScreen(): Promise<void> {
+    try {
+      const win: window.Window = await window.getLastWindow(getContext(this));
+      await win.setWindowLayoutFullScreen(true);
+    } catch (e) {
+      Logger.error('Index setWindowLayoutFullScreen failed');
+    }
   }
 
   aboutToDisappear(): void {
@@ -86,7 +107,7 @@ struct Index {
           top: $r('app.float.default_4'),
           bottom: $r('app.float.default_4')
         })
-        .position({ x: '60%', y: $r('app.float.default_20') })
+        .position({ x: '60%', y: this.topSafeHeight })
         .onClick(() => {
           this.navigateToMain();
         })
