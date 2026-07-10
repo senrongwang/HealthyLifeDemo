@@ -24,7 +24,7 @@ export struct ClockInDialog {
             .fontColor('#FFFFFF')
             .fontWeight(FontWeight.Bold)
             .alignSelf(ItemAlign.Start)
-            .margin({ left: $r('app.float.default_24') })
+            .margin({ left: $r('app.float.default_32') })
             .margin({ bottom: $r('app.float.default_24') })
 
           Button($r('app.string.clock_in'))

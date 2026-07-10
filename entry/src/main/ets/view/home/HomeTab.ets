@@ -176,8 +176,8 @@ export struct HomeTab {
             ProgressRing({ progress: this.getProgress() })
               .margin({ top: $r('app.float.default_10') })
             Text($r('app.string.target_progress'))
-              .fontSize($r('app.float.default_12'))
-              .fontColor('#666666')
+              .fontSize($r('app.float.default_16'))
+              .fontColor('#000000')
               .margin({ top: $r('app.float.default_2') })
           }
           .width('100%')
@@ -305,7 +305,7 @@ export struct HomeTab {
             .fontColor('#FFFFFF')
             .fontWeight(FontWeight.Bold)
             .alignSelf(ItemAlign.Start)
-            .margin({ left: $r('app.float.default_24') })
+            .margin({ left: $r('app.float.default_32') })
             .margin({ bottom: $r('app.float.default_24') })
 
           Button($r('app.string.clock_in'))
