@@ -190,6 +190,132 @@ export class PrefsHelper {
     await p.flush();
   }
 
+  public async getNickname(): Promise<string> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return '';
+    }
+    const v = await p.get(Constants.PREF_KEY_NICKNAME, '');
+    if (typeof v === 'string') {
+      return v;
+    }
+    return '';
+  }
+
+  public async setNickname(value: string): Promise<void> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return;
+    }
+    await p.put(Constants.PREF_KEY_NICKNAME, value);
+    await p.flush();
+  }
+
+  public async getGender(): Promise<number> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return 0;
+    }
+    const v = await p.get(Constants.PREF_KEY_GENDER, 0);
+    if (typeof v === 'number') {
+      return v;
+    }
+    return 0;
+  }
+
+  public async setGender(value: number): Promise<void> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return;
+    }
+    await p.put(Constants.PREF_KEY_GENDER, value);
+    await p.flush();
+  }
+
+  public async getBirthday(): Promise<string> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return '';
+    }
+    const v = await p.get(Constants.PREF_KEY_BIRTHDAY, '');
+    if (typeof v === 'string') {
+      return v;
+    }
+    return '';
+  }
+
+  public async setBirthday(value: string): Promise<void> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return;
+    }
+    await p.put(Constants.PREF_KEY_BIRTHDAY, value);
+    await p.flush();
+  }
+
+  public async getHeight(): Promise<number> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return 0;
+    }
+    const v = await p.get(Constants.PREF_KEY_HEIGHT, 0);
+    if (typeof v === 'number') {
+      return v;
+    }
+    return 0;
+  }
+
+  public async setHeight(value: number): Promise<void> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return;
+    }
+    await p.put(Constants.PREF_KEY_HEIGHT, value);
+    await p.flush();
+  }
+
+  public async getWeight(): Promise<number> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return 0;
+    }
+    const v = await p.get(Constants.PREF_KEY_WEIGHT, 0);
+    if (typeof v === 'number') {
+      return v;
+    }
+    return 0;
+  }
+
+  public async setWeight(value: number): Promise<void> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return;
+    }
+    await p.put(Constants.PREF_KEY_WEIGHT, value);
+    await p.flush();
+  }
+
+  public async getAvatarPath(): Promise<string> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return '';
+    }
+    const v = await p.get(Constants.PREF_KEY_AVATAR_PATH, '');
+    if (typeof v === 'string') {
+      return v;
+    }
+    return '';
+  }
+
+  public async setAvatarPath(value: string): Promise<void> {
+    const p: preferences.Preferences | null = this.pref;
+    if (p === null) {
+      return;
+    }
+    await p.put(Constants.PREF_KEY_AVATAR_PATH, value);
+    await p.flush();
+  }
+
   private static parseAchievements(str: string): number[] {
     if (str.length === 0) {
       return [];

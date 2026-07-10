@@ -11,6 +11,12 @@ export class Constants {
   public static readonly PREF_KEY_FIRST_LAUNCH: string = 'first_launch';
   public static readonly PREF_KEY_CURRENT_DATE: string = 'current_date';
   public static readonly PREF_KEY_HISTORY_SEEDED: string = 'history_seeded';
+  public static readonly PREF_KEY_NICKNAME: string = 'user_nickname';
+  public static readonly PREF_KEY_GENDER: string = 'user_gender';
+  public static readonly PREF_KEY_BIRTHDAY: string = 'user_birthday';
+  public static readonly PREF_KEY_HEIGHT: string = 'user_height';
+  public static readonly PREF_KEY_WEIGHT: string = 'user_weight';
+  public static readonly PREF_KEY_AVATAR_PATH: string = 'user_avatar_path';
 
   public static readonly APP_KEY_CURRENT_DATE: string = 'currentDate';
   public static readonly APP_KEY_STREAK: string = 'streakDays';
@@ -20,6 +26,12 @@ export class Constants {
   public static readonly APP_KEY_ACHIEVEMENT_LIST: string = 'achievementList';
   public static readonly APP_KEY_SPLASH_DONE: string = 'splashDone';
   public static readonly APP_KEY_EDIT_COUNT: string = 'editCount';
+  public static readonly APP_KEY_NICKNAME: string = 'userNickname';
+  public static readonly APP_KEY_GENDER: string = 'userGender';
+  public static readonly APP_KEY_BIRTHDAY: string = 'userBirthday';
+  public static readonly APP_KEY_HEIGHT: string = 'userHeight';
+  public static readonly APP_KEY_WEIGHT: string = 'userWeight';
+  public static readonly APP_KEY_AVATAR_PATH: string = 'userAvatarPath';
 
   public static readonly DEFAULT_REMINDER_TIME: string = '08:00';
 

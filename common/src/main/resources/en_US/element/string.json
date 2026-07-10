@@ -231,6 +231,62 @@
     {
       "name": "card_undone",
       "value": "Undone"
+    },
+    {
+      "name": "profile_edit",
+      "value": "Edit profile"
+    },
+    {
+      "name": "nickname",
+      "value": "Nickname"
+    },
+    {
+      "name": "gender",
+      "value": "Gender"
+    },
+    {
+      "name": "gender_male",
+      "value": "Male"
+    },
+    {
+      "name": "gender_female",
+      "value": "Female"
+    },
+    {
+      "name": "gender_secret",
+      "value": "Secret"
+    },
+    {
+      "name": "birthday",
+      "value": "Birthday"
+    },
+    {
+      "name": "height",
+      "value": "Height"
+    },
+    {
+      "name": "weight",
+      "value": "Weight"
+    },
+    {
+      "name": "unit_cm",
+      "value": "cm"
+    },
+    {
+      "name": "unit_kg",
+      "value": "kg"
+    },
+    {
+      "name": "change_avatar",
+      "value": "Change avatar"
+    },
+    {
+      "name": "not_set",
+      "value": "Not set"
+    },
+    {
+      "name": "select_gender",
+      "value": "Select gender"
     }
   ]
 }

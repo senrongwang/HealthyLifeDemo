@@ -223,6 +223,62 @@
     {
       "name": "unit_pre_day",
       "value": "/ 天"
+    },
+    {
+      "name": "profile_edit",
+      "value": "编辑资料"
+    },
+    {
+      "name": "nickname",
+      "value": "昵称"
+    },
+    {
+      "name": "gender",
+      "value": "性别"
+    },
+    {
+      "name": "gender_male",
+      "value": "男"
+    },
+    {
+      "name": "gender_female",
+      "value": "女"
+    },
+    {
+      "name": "gender_secret",
+      "value": "保密"
+    },
+    {
+      "name": "birthday",
+      "value": "出生日期"
+    },
+    {
+      "name": "height",
+      "value": "身高"
+    },
+    {
+      "name": "weight",
+      "value": "体重"
+    },
+    {
+      "name": "unit_cm",
+      "value": "cm"
+    },
+    {
+      "name": "unit_kg",
+      "value": "kg"
+    },
+    {
+      "name": "change_avatar",
+      "value": "更换头像"
+    },
+    {
+      "name": "not_set",
+      "value": "未设置"
+    },
+    {
+      "name": "select_gender",
+      "value": "选择性别"
     }
   ]
 }
