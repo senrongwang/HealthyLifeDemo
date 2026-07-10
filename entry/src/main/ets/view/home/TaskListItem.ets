@@ -3,12 +3,14 @@ import { TaskInfo, TaskFlag, TaskConstants } from 'common';
 @Component
 export struct TaskListItem {
   @ObjectLink task: TaskInfo;
-  @Prop hasRecord: boolean = false;
   @Prop isDone: boolean = false;
   @Prop finNum: number = 0;
-  @Prop targetValue: number = 1;
   onItemClick: (task: TaskInfo) => void = () => {};
   onItemLongPress: (task: TaskInfo) => void = () => {};
+
+  private currentCount(): string {
+    return this.finNum > 0 ? this.finNum.toString() : '--';
+  }
 
   build(): void {
     Row() {
@@ -28,9 +30,9 @@ export struct TaskListItem {
           .fontSize($r('app.float.default_14'))
           .fontColor('#999999')
           .margin({ right: '5%' })
-      } else if (this.task.flag === TaskFlag.MULTI && this.hasRecord) {
+      } else if (this.task.flag === TaskFlag.MULTI) {
         Row() {
-          Text(`${this.finNum} / ${this.targetValue} `)
+          Text(`${this.currentCount()} / ${this.task.targetValue} `)
             .fontSize($r('app.float.default_14'))
             .fontColor('#999999')
           if (TaskConstants.getMeta(this.task.taskType).unit !== undefined) {

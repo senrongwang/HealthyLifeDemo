@@ -78,8 +78,9 @@ export class TaskRepository {
       return;
     }
     const tt: number = taskType;
-    await store.executeSql(`UPDATE task SET isOpen=0 WHERE taskType=${tt}`);
-    Logger.info(`deleteTask(close) taskType=${tt}`);
+    await store.executeSql(`DELETE FROM task_record WHERE taskType=${tt}`);
+    await store.executeSql(`DELETE FROM task WHERE taskType=${tt}`);
+    Logger.info(`deleteTask(physical) taskType=${tt}`);
   }
 
   public async getTodayRecords(): Promise<TaskRecord[]> {
@@ -103,7 +104,15 @@ export class TaskRepository {
       return null;
     }
     const today: string = DateUtils.today();
-    await this.ensureRecord(today, taskType, 1);
+    const tasks: TaskInfo[] = await this.getTasks();
+    let taskTarget: number = 1;
+    for (const t of tasks) {
+      if (t.taskType === taskType) {
+        taskTarget = t.targetValue;
+        break;
+      }
+    }
+    await this.ensureRecord(today, taskType, taskTarget);
     const predicates: relationalStore.RdbPredicates = new relationalStore.RdbPredicates(RdbTables.TASK_RECORD_TABLE);
     predicates.equalTo(RdbTables.RECORD_DATE, today);
     predicates.equalTo(RdbTables.RECORD_TASK_TYPE, taskType);
@@ -246,8 +255,9 @@ export class TaskRepository {
     }
     const tt: number = taskType;
     const sql: string =
-      'INSERT OR IGNORE INTO task_record(date, taskType, finNum, targetValue) ' +
-      `VALUES('${date}', ${tt}, 0, ${targetValue})`;
+      'INSERT INTO task_record(date, taskType, finNum, targetValue) ' +
+      `VALUES('${date}', ${tt}, 0, ${targetValue}) ` +
+      'ON CONFLICT(date, taskType) DO UPDATE SET targetValue=excluded.targetValue';
     await store.executeSql(sql);
   }
 

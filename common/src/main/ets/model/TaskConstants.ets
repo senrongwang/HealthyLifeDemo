@@ -26,7 +26,7 @@ export class TaskConstants {
           taskIcon: $r('app.media.ic_task_drink'),
           dialogIcon: $r('app.media.ic_dialog_drink'),
           cardIcon: $r('app.media.ic_card_drink'),
-          unit: $r('app.string.unit_times'),
+          unit: $r('app.string.unit_liter'),
           flag: TaskFlag.MULTI
         };
       case TaskType.APPLE:

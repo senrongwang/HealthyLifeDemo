@@ -137,15 +137,6 @@ export struct HomeTab {
     return r !== null ? r.finNum : 0;
   }
 
-  private recordTargetValue(taskType: TaskType): number {
-    const r: TaskRecord | null = this.findRecord(taskType);
-    return r !== null ? r.targetValue : 1;
-  }
-
-  private hasRecord(taskType: TaskType): boolean {
-    return this.findRecord(taskType) !== null;
-  }
-
   private getOpenTasks(): TaskInfo[] {
     const openTasks: TaskInfo[] = [];
     for (const t of this.taskList) {
@@ -164,7 +155,7 @@ export struct HomeTab {
   private confirmDeleteTask(taskType: TaskType): void {
     AlertDialog.show({
       title: '删除任务',
-      message: '确定要删除该任务吗？历史打卡记录将保留。',
+      message: '确定要删除该任务吗？该任务及其打卡记录将被永久删除。',
       autoCancel: true,
       confirm: {
         value: '确认',
@@ -247,10 +238,8 @@ export struct HomeTab {
                 ListItem() {
                   TaskListItem({
                     task: task,
-                    hasRecord: this.hasRecord(task.taskType),
                     isDone: this.recordIsDone(task.taskType),
                     finNum: this.recordFinNum(task.taskType),
-                    targetValue: this.recordTargetValue(task.taskType),
                     onItemClick: (t: TaskInfo) => {
                       this.clockInTaskType = t.taskType;
                       this.showClockInDialog = true;
