@@ -305,7 +305,7 @@ export struct HomeTab {
             .fontColor('#FFFFFF')
             .fontWeight(FontWeight.Bold)
             .alignSelf(ItemAlign.Start)
-            .margin({ left: $r('app.float.default_32') })
+            .margin({ left: $r('app.float.default_40') })
             .margin({ bottom: $r('app.float.default_24') })
 
           Button($r('app.string.clock_in'))
