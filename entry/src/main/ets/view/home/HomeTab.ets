@@ -127,6 +127,25 @@ export struct HomeTab {
     return null;
   }
 
+  private recordIsDone(taskType: TaskType): boolean {
+    const r: TaskRecord | null = this.findRecord(taskType);
+    return r !== null && r.isDone;
+  }
+
+  private recordFinNum(taskType: TaskType): number {
+    const r: TaskRecord | null = this.findRecord(taskType);
+    return r !== null ? r.finNum : 0;
+  }
+
+  private recordTargetValue(taskType: TaskType): number {
+    const r: TaskRecord | null = this.findRecord(taskType);
+    return r !== null ? r.targetValue : 1;
+  }
+
+  private hasRecord(taskType: TaskType): boolean {
+    return this.findRecord(taskType) !== null;
+  }
+
   private getOpenTasks(): TaskInfo[] {
     const openTasks: TaskInfo[] = [];
     for (const t of this.taskList) {
@@ -228,7 +247,10 @@ export struct HomeTab {
                 ListItem() {
                   TaskListItem({
                     task: task,
-                    record: this.findRecord(task.taskType),
+                    hasRecord: this.hasRecord(task.taskType),
+                    isDone: this.recordIsDone(task.taskType),
+                    finNum: this.recordFinNum(task.taskType),
+                    targetValue: this.recordTargetValue(task.taskType),
                     onItemClick: (t: TaskInfo) => {
                       this.clockInTaskType = t.taskType;
                       this.showClockInDialog = true;

@@ -14,7 +14,7 @@ struct MainTab {
         .height($r('app.float.default_24'))
       Text(title)
         .fontSize($r('app.float.default_10'))
-        .fontColor(this.currentIndex === targetIndex ? '#FF6B00' : '#999999')
+        .fontColor(this.currentIndex === targetIndex ? '#0A58F6' : '#999999')
         .margin({ top: $r('app.float.default_2') })
     }
     .width('100%')

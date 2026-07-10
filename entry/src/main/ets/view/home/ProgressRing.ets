@@ -1,6 +1,6 @@
 @Component
 export struct ProgressRing {
-  progress: number = 0;
+  @Prop progress: number = 0;
   ringSize: number = 100;
   strokeWidth: number = 8;
 
@@ -13,11 +13,11 @@ export struct ProgressRing {
           strokeWidth: this.strokeWidth,
           scaleWidth: 0.9
         })
-        .color('#FF6B00')
+        .color('#0D59F6')
         .backgroundColor('#E0E0E0')
 
       Text(`${this.progress}%`)
-        .fontSize($r('app.float.default_36'))
+        .fontSize($r('app.float.default_26'))
         .fontColor('#FF6B00')
         .fontWeight(FontWeight.Bold)
     }

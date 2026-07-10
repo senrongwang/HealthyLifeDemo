@@ -202,7 +202,7 @@ struct TaskEditPage {
       Button($r('app.string.complete'))
         .fontSize($r('app.float.default_16'))
         .fontColor('#FFFFFF')
-        .backgroundColor('#FF6B00')
+        .backgroundColor('#0D59F6')
         .borderRadius($r('app.float.default_24'))
         .width('80%')
         .height($r('app.float.default_48'))

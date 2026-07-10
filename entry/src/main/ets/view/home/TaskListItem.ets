@@ -1,9 +1,12 @@
-import { TaskInfo, TaskRecord, TaskFlag, TaskConstants } from 'common';
+import { TaskInfo, TaskFlag, TaskConstants } from 'common';
 
 @Component
 export struct TaskListItem {
   @ObjectLink task: TaskInfo;
-  record: TaskRecord | null = null;
+  @Prop hasRecord: boolean = false;
+  @Prop isDone: boolean = false;
+  @Prop finNum: number = 0;
+  @Prop targetValue: number = 1;
   onItemClick: (task: TaskInfo) => void = () => {};
   onItemLongPress: (task: TaskInfo) => void = () => {};
 
@@ -20,14 +23,14 @@ export struct TaskListItem {
         .margin({ left: $r('app.float.default_12') })
         .layoutWeight(1)
 
-      if (this.record !== null && this.record.isDone) {
+      if (this.isDone) {
         Text($r('app.string.was_done'))
           .fontSize($r('app.float.default_14'))
           .fontColor('#999999')
           .margin({ right: '5%' })
-      } else if (this.task.flag === TaskFlag.MULTI && this.record !== null) {
+      } else if (this.task.flag === TaskFlag.MULTI && this.hasRecord) {
         Row() {
-          Text(`${this.record.finNum} / ${this.record.targetValue} `)
+          Text(`${this.finNum} / ${this.targetValue} `)
             .fontSize($r('app.float.default_14'))
             .fontColor('#999999')
           if (TaskConstants.getMeta(this.task.taskType).unit !== undefined) {
