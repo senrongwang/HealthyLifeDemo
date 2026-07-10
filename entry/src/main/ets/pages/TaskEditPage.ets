@@ -1,5 +1,6 @@
 import { router } from '@kit.ArkUI';
 import { TaskType, TaskFlag, TaskInfo, TaskConstants, TaskMeta, TaskRepository, isReminderSupported, Logger } from 'common';
+import { TargetPickerDialog } from '../view/dialog/TargetPickerDialog';
 
 interface RouteParams {
   taskType: number;
@@ -12,11 +13,10 @@ struct TaskEditPage {
   @StorageLink('taskList') taskList: TaskInfo[] = [];
   @State task: TaskInfo = new TaskInfo(TaskType.GETUP, TaskFlag.SINGLE);
   @State isAddMode: boolean = true;
-  @State showTimePicker: boolean = false;
-  @State tempHour: number = 8;
-  @State tempMinute: number = 0;
-  @State showTargetDialog: boolean = false;
-  @State tempTarget: string = '1';
+  @State showPicker: boolean = false;
+  @State pickerIsTimeMode: boolean = false;
+  @State pickerInitVal1: number = 0;
+  @State pickerInitVal2: number = 0;
 
   aboutToAppear(): void {
     const params: RouteParams = router.getParams() as RouteParams;
@@ -45,8 +45,8 @@ struct TaskEditPage {
 
     const timeParts: string[] = this.task.reminderTime.split(':');
     if (timeParts.length >= 2) {
-      this.tempHour = parseInt(timeParts[0], 10);
-      this.tempMinute = parseInt(timeParts[1], 10);
+      this.pickerInitVal1 = parseInt(timeParts[0], 10);
+      this.pickerInitVal2 = parseInt(timeParts[1], 10);
     }
   }
 
@@ -141,10 +141,11 @@ struct TaskEditPage {
           .onClick(() => {
             const timeParts: string[] = this.task.reminderTime.split(':');
             if (timeParts.length >= 2) {
-              this.tempHour = parseInt(timeParts[0], 10);
-              this.tempMinute = parseInt(timeParts[1], 10);
+              this.pickerInitVal1 = parseInt(timeParts[0], 10);
+              this.pickerInitVal2 = parseInt(timeParts[1], 10);
             }
-            this.showTimePicker = true;
+            this.pickerIsTimeMode = true;
+            this.showPicker = true;
           })
         }
 
@@ -174,8 +175,9 @@ struct TaskEditPage {
           .padding({ left: $r('app.float.default_16'), right: $r('app.float.default_16') })
           .alignItems(VerticalAlign.Center)
           .onClick(() => {
-            this.tempTarget = this.task.targetValue.toString();
-            this.showTargetDialog = true;
+            this.pickerInitVal1 = this.task.targetValue - 1;
+            this.pickerIsTimeMode = false;
+            this.showPicker = true;
           })
         }
       }
@@ -201,83 +203,31 @@ struct TaskEditPage {
     .width('100%')
     .height('100%')
     .backgroundColor('#F2F3F5')
-    .bindSheet($$this.showTimePicker, this.timePickerBuilder(), {
-      height: 300,
-      dragBar: true
-    })
-    .bindSheet($$this.showTargetDialog, this.targetDialogBuilder(), {
-      height: 300,
+    .bindSheet($$this.showPicker, this.pickerBuilder(), {
+      height: 340,
       dragBar: true
     })
   }
 
   @Builder
-  timePickerBuilder(): void {
-    Column() {
-      TimePicker({
-        selected: new Date(2026, 0, 1, this.tempHour, this.tempMinute)
-      })
-        .onChange((value: TimePickerResult) => {
-          this.tempHour = value.hour;
-          this.tempMinute = value.minute;
-        })
-
-      Button($r('app.string.confirm'))
-        .fontSize($r('app.float.default_16'))
-        .fontColor('#FFFFFF')
-        .backgroundColor('#FF6B00')
-        .borderRadius($r('app.float.default_24'))
-        .width($r('app.float.default_132'))
-        .height($r('app.float.default_40'))
-        .margin({ top: $r('app.float.default_16') })
-        .onClick(() => {
-          const hh: string = this.tempHour < 10 ? '0' + this.tempHour : '' + this.tempHour;
-          const mm: string = this.tempMinute < 10 ? '0' + this.tempMinute : '' + this.tempMinute;
+  pickerBuilder(): void {
+    TargetPickerDialog({
+      isTimeMode: this.pickerIsTimeMode,
+      initialValue1: this.pickerInitVal1,
+      initialValue2: this.pickerInitVal2,
+      onConfirm: (value1: number, value2: number) => {
+        if (this.pickerIsTimeMode) {
+          const hh: string = value1 < 10 ? '0' + value1 : '' + value1;
+          const mm: string = value2 < 10 ? '0' + value2 : '' + value2;
           this.task.reminderTime = `${hh}:${mm}`;
-          this.showTimePicker = false;
-        })
-    }
-    .width('100%')
-    .justifyContent(FlexAlign.Center)
-    .alignItems(HorizontalAlign.Center)
-  }
-
-  @Builder
-  targetDialogBuilder(): void {
-    Column() {
-      Text($r('app.string.target_setting'))
-        .fontSize($r('app.float.default_18'))
-        .fontColor('#333333')
-        .fontWeight(FontWeight.Bold)
-        .margin({ top: $r('app.float.default_24') })
-
-      TextInput({ text: this.tempTarget, placeholder: '1-99' })
-        .type(InputType.Number)
-        .width('60%')
-        .height($r('app.float.default_40'))
-        .margin({ top: $r('app.float.default_16') })
-        .onChange((value: string) => {
-          this.tempTarget = value;
-        })
-
-      Button($r('app.string.confirm'))
-        .fontSize($r('app.float.default_16'))
-        .fontColor('#FFFFFF')
-        .backgroundColor('#FF6B00')
-        .borderRadius($r('app.float.default_24'))
-        .width($r('app.float.default_132'))
-        .height($r('app.float.default_40'))
-        .margin({ top: $r('app.float.default_16') })
-        .onClick(() => {
-          const val: number = parseInt(this.tempTarget, 10);
-          if (val >= 1 && val <= 99) {
-            this.task.targetValue = val;
-            this.showTargetDialog = false;
-          }
-        })
-    }
-    .width('100%')
-    .justifyContent(FlexAlign.Center)
-    .alignItems(HorizontalAlign.Center)
+        } else {
+          this.task.targetValue = value1 + 1;
+        }
+        this.showPicker = false;
+      },
+      onCancel: () => {
+        this.showPicker = false;
+      }
+    })
   }
 }
