@@ -26,6 +26,7 @@ export struct HomeTab {
   @State selectedDateRecords: TaskRecord[] = [];
   @StorageLink('statusBarHeight') statusBarHeight: number = 0;
   @State topSafeHeight: number = 0;
+  @Watch('onEditCountChanged') @StorageLink('editCount') editCount: number = 0;
 
   aboutToAppear(): void {
     AppStorage.setOrCreate('achDialogShow', false);
@@ -33,6 +34,10 @@ export struct HomeTab {
     this.calcTopSafeHeight();
     this.loadData();
     new AchievementViewModel().loadAchievements();
+  }
+
+  onEditCountChanged(): void {
+    this.loadData();
   }
 
   private calcTopSafeHeight(): void {
@@ -271,7 +276,7 @@ export struct HomeTab {
                   })
                 }
               }, (task: TaskInfo) => {
-                return task.taskType.toString();
+                return task.taskType.toString() + '_' + task.targetValue.toString();
               })
             }
             .width('100%')

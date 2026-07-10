@@ -19,6 +19,7 @@ export class Constants {
   public static readonly APP_KEY_TODAY_RECORDS: string = 'todayRecords';
   public static readonly APP_KEY_ACHIEVEMENT_LIST: string = 'achievementList';
   public static readonly APP_KEY_SPLASH_DONE: string = 'splashDone';
+  public static readonly APP_KEY_EDIT_COUNT: string = 'editCount';
 
   public static readonly DEFAULT_REMINDER_TIME: string = '08:00';
 

@@ -70,6 +70,8 @@ struct TaskEditPage {
       const repo: TaskRepository = TaskRepository.getInstance();
       const tasks: TaskInfo[] = await repo.getTasks();
       AppStorage.setOrCreate('taskList', tasks);
+      const count: number = AppStorage.get<number>('editCount') || 0;
+      AppStorage.setOrCreate('editCount', count + 1);
       await this.syncReminder();
       Logger.info(`TaskEditPage save taskType=${this.task.taskType}`);
       router.back();
